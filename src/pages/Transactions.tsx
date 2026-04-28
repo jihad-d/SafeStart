@@ -36,7 +36,6 @@ export default function Transactions() {
   const [amount, setAmount] = useState('')
   const [address, setAddress] = useState('')
   const [step, setStep] = useState<'form'|'summary'|'done'>('form')
-  const [score, setScore] = useState<SecurityScore | null>(null)
   const [confirming, setConfirming] = useState(false)
 
   const coin = MOCK_PRICES.find(c => c.id === selectedId) ?? MOCK_PRICES[0]
@@ -46,20 +45,31 @@ export default function Transactions() {
   const gas = simulateGas()
   const slippage = amount ? simulateSlippage(parseFloat(amount)) : 0
 
-  const computeScore = useCallback(() => {
-    if (!amount || !coin) return
-    const s = calcSecurityScore(
-      tab, parseFloat(amount),
-      profile?.simulated_balance_eur ?? 750,
-      PORTFOLIO_VALUE,
-      Math.abs(coin.price_change_percentage_24h),
-      tab === 'swap' ? slippage : 0,
-      tab === 'send' ? validateAddress(address) : true,
-    )
-    setScore(s)
-  }, [amount, coin, tab, slippage, address, profile])
+  // const computeScore = useCallback(() => {
+  //   if (!amount || !coin) return
+  //   const s = calcSecurityScore(
+  //     tab, parseFloat(amount),
+  //     profile?.simulated_balance_eur ?? 750,
+  //     PORTFOLIO_VALUE,
+  //     Math.abs(coin.price_change_percentage_24h),
+  //     tab === 'swap' ? slippage : 0,
+  //     tab === 'send' ? validateAddress(address) : true,
+  //   )
+  //   setScore(s)
+  // }, [amount, coin, tab, slippage, address, profile])
 
-  useEffect(() => { computeScore() }, [computeScore])
+  // useEffect(() => { computeScore() }, [computeScore])
+
+  // On calcule le score directement pendant le rendu, pas besoin de useEffect
+  const score = (amount && coin) ? calcSecurityScore(
+    tab, 
+    parseFloat(amount),
+    profile?.simulated_balance_eur ?? 750,
+    PORTFOLIO_VALUE,
+    Math.abs(coin.price_change_percentage_24h),
+    tab === 'swap' ? slippage : 0,
+    tab === 'send' ? validateAddress(address) : true,
+  ) : null;
 
   const proceed = () => {
     if (!amount || parseFloat(amount) <= 0) { toast.error('Saisis un montant valide.'); return }
@@ -150,7 +160,7 @@ export default function Transactions() {
     }
   }
 
-  const reset = () => { setStep('form'); setAmount(''); setAddress(''); setScore(null) }
+  const reset = () => { setStep('form'); setAmount(''); setAddress('') }
 
   if (step === 'done') return (
     <div className="fade-up" style={{ maxWidth: 480, margin: '0 auto' }}>
@@ -183,7 +193,7 @@ export default function Transactions() {
       {/* Tabs */}
       <div style={{ display: 'flex', gap: 6, background: 'var(--glass)', border: '1px solid var(--border)', borderRadius: 14, padding: 5, width: 'fit-content' }}>
         {TABS.map(({ type, label, icon: Icon }) => (
-          <button key={type} onClick={() => { setTab(type); setStep('form'); setScore(null) }}
+          <button key={type} onClick={() => { setTab(type); setStep('form')}}
             style={{ padding: '9px 18px', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, border: 'none', transition: 'all .2s', ...(tab === type ? { background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', color: '#fff' } : { background: 'transparent', color: 'var(--tx2)' }) }}>
             <Icon size={15} />{label}
           </button>
