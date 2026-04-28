@@ -1,0 +1,35 @@
+/* ═══════════════════════════════════════════════
+   NAVIGATION — Sidebar nav items
+   ═══════════════════════════════════════════════ */
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--tx3);
+  text-decoration: none;
+  transition: all .2s;
+  border: 1px solid transparent;
+  letter-spacing: .01em;
+}
+
+.nav-item:hover {
+  background: var(--glass2);
+  color: var(--tx2);
+}
+
+.nav-item.active {
+  background: linear-gradient(135deg, rgba(124,92,252,0.2), rgba(79,53,210,0.12));
+  color: var(--pri2);
+  border-color: rgba(124,92,252,0.25);
+  box-shadow: 0 2px 12px rgba(124,92,252,0.15);
+}
+
+.nav-item.active svg {
+  color: var(--pri2);
+}

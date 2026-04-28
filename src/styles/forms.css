@@ -1,0 +1,72 @@
+/* ═══════════════════════════════════════════════
+   FORMS — Inputs, selects, toggle switch
+   ═══════════════════════════════════════════════ */
+
+/* ── Glass input / select ── */
+.glass-input {
+  background: var(--glass2);
+  border: 1px solid var(--border);
+  color: var(--tx);
+  border-radius: 14px;
+  padding: 13px 16px;
+  font-size: 14px;
+  font-family: inherit;
+  width: 100%;
+  outline: none;
+  backdrop-filter: blur(12px);
+  transition: border-color .2s, box-shadow .2s, background .2s;
+}
+
+.glass-input:focus {
+  border-color: var(--pri);
+  box-shadow: 0 0 0 3px rgba(124,92,252,0.15);
+  background: var(--glass-heavy);
+}
+
+.glass-input::placeholder      { color: var(--tx3); }
+select.glass-input option       { background: var(--bg3); color: var(--tx); }
+
+/* ── Toggle switch ── */
+.toggle-wrap {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.toggle-wrap input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  border-radius: 99px;
+  background: rgba(90,90,128,.4);
+  transition: .25s;
+  cursor: pointer;
+}
+
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  top: 3px;
+  left: 3px;
+  transition: .25s;
+  box-shadow: 0 2px 6px rgba(0,0,0,.3);
+}
+
+.toggle-wrap input:checked + .toggle-slider {
+  background: linear-gradient(135deg, var(--pri), var(--pri3));
+}
+
+.toggle-wrap input:checked + .toggle-slider::before {
+  left: 23px;
+}

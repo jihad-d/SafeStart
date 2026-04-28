@@ -1,0 +1,6 @@
+export { default as Onboarding } from './Onboarding'
+export { default as Dashboard } from './Dashboard'
+export { default as Wallet } from './Wallet'
+export { default as Market } from './Market'
+export { default as Transactions } from './Transactions'
+export { History, Learn, Challenges, Progress, Settings, Help } from './Pages'

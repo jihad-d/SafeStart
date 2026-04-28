@@ -1,0 +1,77 @@
+/* ═══════════════════════════════════════════════
+   BUTTONS — Primary, glass, pill variants
+   ═══════════════════════════════════════════════ */
+
+/* ── Primary button ── */
+.btn-pri {
+  background: linear-gradient(135deg, var(--pri), var(--pri3));
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  padding: 12px 22px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all .25s cubic-bezier(.34,1.56,.64,1);
+  box-shadow: 0 4px 20px rgba(124,92,252,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+  letter-spacing: .01em;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-pri::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+  opacity: 0;
+  transition: opacity .2s;
+}
+
+.btn-pri:hover              { transform: translateY(-2px) scale(1.02); box-shadow: 0 8px 30px rgba(124,92,252,0.55); }
+.btn-pri:hover::before      { opacity: 1; }
+.btn-pri:active             { transform: translateY(0) scale(.98); }
+.btn-pri:disabled           { opacity: .45; cursor: not-allowed; transform: none; }
+
+/* ── Glass button ── */
+.btn-glass {
+  background: var(--glass2);
+  border: 1px solid var(--border);
+  color: var(--tx2);
+  border-radius: 14px;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all .2s;
+  backdrop-filter: blur(12px);
+}
+
+.btn-glass:hover {
+  background: var(--glass-heavy);
+  color: var(--tx);
+  border-color: rgba(124,92,252,0.4);
+}
+
+/* ── Pill button (filter tabs) ── */
+.btn-pill {
+  background: var(--glass2);
+  border: 1px solid var(--border);
+  color: var(--tx2);
+  border-radius: 99px;
+  padding: 7px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.btn-pill.active {
+  background: linear-gradient(135deg, var(--pri), var(--pri3));
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(124,92,252,0.4);
+}

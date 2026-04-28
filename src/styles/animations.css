@@ -1,0 +1,40 @@
+/* ═══════════════════════════════════════════════
+   ANIMATIONS — Keyframes, utility classes,
+   skeletons, typing dots, mini chart
+   ═══════════════════════════════════════════════ */
+
+/* ── Keyframes ── */
+@keyframes fadeUp  { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn  { from { opacity: 0; }                               to { opacity: 1; } }
+@keyframes spin    { to { transform: rotate(360deg); } }
+@keyframes pulse   { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+@keyframes typing  { 0%, 80%, 100% { transform: scale(.55); opacity: .3; } 40% { transform: scale(1); opacity: 1; } }
+@keyframes float   { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+/* ── Utility animation classes ── */
+.fade-up { animation: fadeUp  .4s cubic-bezier(.16,1,.3,1) both; }
+.fade-in { animation: fadeIn  .3s ease both; }
+.spin    { animation: spin    1s linear infinite; }
+.pulse   { animation: pulse   2s ease-in-out infinite; }
+.float   { animation: float   4s ease-in-out infinite; }
+
+/* ── Typing indicator dots ── */
+.dot1 { animation: typing 1.2s       infinite; }
+.dot2 { animation: typing 1.2s .2s   infinite; }
+.dot3 { animation: typing 1.2s .4s   infinite; }
+
+/* ── Shimmer skeleton loader ── */
+.skeleton {
+  background: linear-gradient(90deg, var(--bg3) 25%, var(--bg4) 50%, var(--bg3) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+  border-radius: 12px;
+}
+
+/* ── Mini activity chart placeholder ── */
+.mini-chart {
+  width: 100%;
+  height: 48px;
+  opacity: .7;
+}

@@ -1,0 +1,56 @@
+/* ═══════════════════════════════════════════════════════════
+   DESIGN TOKENS — SafeStart × Aura AI
+   Dark violet, deep glass, bold type, rounded cards
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Brand palette ── */
+  --pri:   #7c5cfc;
+  --pri2:  #a78bfa;
+  --pri3:  #4f35d2;
+  --acc:   #c084fc;
+  --safe:  #10b981;
+  --warn:  #f59e0b;
+  --danger:#ef4444;
+
+  /* ── Dark background scale ── */
+  --bg:    #0d0b1a;
+  --bg2:   #120f24;
+  --bg3:   #18142e;
+  --bg4:   #1f1a38;
+
+  /* ── Text scale ── */
+  --tx:    #eeeeff;
+  --tx2:   #a8a8cc;
+  --tx3:   #5a5a80;
+
+  /* ── Glass system ── */
+  --glass:       rgba(124,92,252,0.07);
+  --glass2:      rgba(124,92,252,0.13);
+  --glass-heavy: rgba(124,92,252,0.22);
+  --border:      rgba(124,92,252,0.2);
+  --border2:     rgba(255,255,255,0.05);
+
+  /* ── Shadows & glow ── */
+  --shadow:    0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+  --shadow-lg: 0 24px 70px rgba(0,0,0,0.6);
+  --glow:      0 0 40px rgba(124,92,252,0.3);
+}
+
+/* ── Light theme overrides ── */
+.light {
+  --bg:    #f0eeff;
+  --bg2:   #faf9ff;
+  --bg3:   #ffffff;
+  --bg4:   #f5f3ff;
+  --tx:    #1a1535;
+  --tx2:   #4a4570;
+  --tx3:   #9590b8;
+  --glass:       rgba(255,255,255,0.65);
+  --glass2:      rgba(255,255,255,0.88);
+  --glass-heavy: rgba(255,255,255,0.96);
+  --border:      rgba(124,92,252,0.14);
+  --border2:     rgba(124,92,252,0.06);
+  --shadow:      0 8px 32px rgba(124,92,252,0.10);
+  --shadow-lg:   0 24px 60px rgba(124,92,252,0.16);
+}
