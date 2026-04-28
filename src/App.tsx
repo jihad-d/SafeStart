@@ -21,7 +21,6 @@ function Guard({ children }: { children: React.ReactNode }) {
     </div>
   )
   if (!profile) return <Navigate to="/login" replace />
-  if (!profile.onboarding_completed) return <Navigate to="/onboarding" replace />
   return <>{children}</>
 }
 

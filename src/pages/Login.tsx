@@ -15,7 +15,7 @@ export default function Login() {
 
   useEffect(() => {
     if (!profile) return
-    navigate(profile.onboarding_completed ? '/dashboard' : '/onboarding')
+    navigate('/dashboard')
   }, [navigate, profile])
 
   const submit = async (e: React.FormEvent) => {
@@ -23,14 +23,14 @@ export default function Login() {
     setError('')
     setLoading(true)
 
-    const { error } = await signIn(email, pwd)
-    if (error) {
-      if (error.toLowerCase().includes('email not confirmed')) {
+    const { error: authError } = await signIn(email, pwd)
+    if (authError) {
+      if (authError.toLowerCase().includes('email not confirmed')) {
         setError('Ton email n a pas encore ete confirme.')
-      } else if (error.toLowerCase().includes('invalid login credentials')) {
+      } else if (authError.toLowerCase().includes('invalid login credentials')) {
         setError('Identifiants incorrects.')
       } else {
-        setError(error)
+        setError(authError)
       }
       setLoading(false)
       return
