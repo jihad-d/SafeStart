@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom'
 import { ShoppingCart, Send, ArrowLeftRight, CheckCircle, AlertTriangle } from 'lucide-react'
 import { MOCK_PRICES, fmtEur, fmtCrypto, calcSecurityScore, simulateFees, simulateGas, simulateSlippage, validateAddress } from '@/lib/utils'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { isSupabaseConfigured, supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 import SecurityScoreBadge from '@/components/transactions/SecurityScoreBadge'
 import AIPanel from '@/components/ai/AIPanel'
 import type { PortfolioAsset, SecurityScore, TxType } from '@/types'
@@ -84,7 +84,7 @@ export default function Transactions() {
     try {
       await new Promise(r => setTimeout(r, 800))
 
-      if (profile && profile.id !== 'demo' && isSupabaseConfigured && supabase) {
+      if (profile && profile.id !== 'demo' && supabase) {
         const aiComment =
           score?.label === 'safe'
             ? 'Transaction bien parametree avec un niveau de risque faible.'

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Clock, ChevronDown, ChevronUp, BookOpen, Trophy, Lock, ChevronRight, BarChart3, Shield, Zap, Star, Search, MessageSquare } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { isSupabaseConfigured, supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 import { fmtEur } from '@/lib/utils'
 import type { Transaction } from '@/types'
 import toast from 'react-hot-toast'
@@ -50,7 +50,7 @@ export function History() {
 
   useEffect(() => {
     const loadTransactions = async () => {
-      if (!profile?.id || profile.id === 'demo' || !isSupabaseConfigured || !supabase) {
+      if (!profile?.id || profile.id === 'demo' || !supabase) {
         setTxs([])
         return
       }
@@ -278,7 +278,7 @@ export function Progress() {
 
   useEffect(() => {
     const loadBadges = async () => {
-      if (!profile?.id || profile.id === 'demo' || !isSupabaseConfigured || !supabase) {
+      if (!profile?.id || profile.id === 'demo' || !supabase) {
         setBadges([])
         return
       }

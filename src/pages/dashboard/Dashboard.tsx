@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, Zap, TrendingUp, TrendingDown } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { isSupabaseConfigured, supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 import { fmtEur } from '@/lib/utils'
-import AIPanel from '@/components/ai/AIPanel'
+import AIPanel from '@/components/ai/AIPanel.tsx'
 import type { PortfolioAsset } from '@/types'
 import './Dashboard.css'
 
@@ -50,7 +50,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     const loadAssets = async () => {
-      if (!profile?.id || profile.id === 'demo' || !isSupabaseConfigured || !supabase) {
+      if (!profile?.id || profile.id === 'demo' || !supabase) {
         setAssets([]); return
       }
       const { data, error } = await supabase.from('portfolio_assets').select('*').eq('user_id', profile.id)
