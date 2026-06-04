@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { isSupabaseConfigured, supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 import type { UserProfile } from '@/types'
 
 interface AuthCtx {
@@ -66,15 +66,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
-    if (!isSupabaseConfigured || !supabase) {
+    if (!supabase) {
       setLoading(false)
       return
     }
 
     const client = supabase
-    const loadingTimeout = window.setTimeout(() => {
-      setLoading(false)
-    }, 4000)
 
     const init = async () => {
       try {
@@ -82,21 +79,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (session?.user) {
           const loadedProfile = await fetchProfile(session.user.id)
           if (!loadedProfile) {
-            await client.auth.signOut()
             setProfile(null)
           }
         }
       } catch (error) {
         console.error('auth init error:', error)
       } finally {
-        window.clearTimeout(loadingTimeout)
         setLoading(false)
       }
     }
 
     init()
 
-    const { data: listener } = client.auth.onAuthStateChange(async (_event, session) => {
+    const { data: listener } = client.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'INITIAL_SESSION') return 
+
       if (!session?.user) {
         setProfile(null)
         return
@@ -104,19 +101,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const loadedProfile = await fetchProfile(session.user.id)
       if (!loadedProfile) {
-        await client.auth.signOut()
         setProfile(null)
       }
     })
 
     return () => {
-      window.clearTimeout(loadingTimeout)
       listener.subscription.unsubscribe()
     }
   }, [])
 
   const signIn = async (email: string, password: string) => {
-    if (!isSupabaseConfigured || !supabase) {
+    if (!supabase) {
       return { error: 'Configuration Supabase manquante.' }
     }
 
@@ -147,7 +142,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signUp = async (email: string, password: string) => {
-    if (!isSupabaseConfigured || !supabase) {
+    if (!supabase) {
       return { error: 'Supabase n est pas configure. Ajoute .env.local pour activer l inscription.' }
     }
 

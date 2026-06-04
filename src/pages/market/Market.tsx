@@ -20,7 +20,9 @@ export default function Market() {
     setLoading(false)
   }
 
-  useEffect(() => { fetch() }, [])
+  useEffect(() => {
+    fetch().then(() => console.log('Prix chargés:', coins[0]?.current_price))
+  }, [])
 
   const filtered = coins.filter(c =>
     c.name.toLowerCase().includes(search.toLowerCase()) ||

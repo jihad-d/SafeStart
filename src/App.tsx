@@ -3,15 +3,15 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider, useAuth } from '@/lib/hooks/useAuth'
 
-import Login         from '@/pages/Login'
-import Register      from '@/pages/Register'
-import Onboarding    from '@/pages/Onboarding'
+import Login         from '@/pages/login/Login'
+import Register      from '@/pages/register/Register'
+import Onboarding    from '@/pages/onboarding/Onboarding'
 import AppLayout     from '@/components/layout/AppLayout'
-import Dashboard     from '@/pages/Dashboard'
-import Wallet        from '@/pages/Wallet'
-import Market        from '@/pages/Market'
-import Transactions  from '@/pages/Transactions'
-import { History, Learn, Challenges, Progress, Settings, Help } from '@/pages/Pages'
+import Dashboard     from '@/pages/dashboard/Dashboard'
+import Wallet        from '@/pages/wallet/Wallet'
+import Market        from '@/pages/market/Market'
+import Transactions  from '@/pages/transactions/Transactions'
+import { History, Learn, Challenges, Progress, Settings, Help } from '@/pages/pages/Pages'
 
 function Guard({ children }: { children: React.ReactNode }) {
   const { profile, loading } = useAuth()

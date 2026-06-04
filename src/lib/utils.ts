@@ -20,11 +20,16 @@ export async function getMarketPrices(): Promise<CryptoAsset[]> {
   if (cachedPrices.length && Date.now() - cacheTs < 60_000) return cachedPrices
   try {
     const ids = MOCK_PRICES.map(c => c.id).join(',')
+    const apiKey = import.meta.env.VITE_COINGECKO_API_KEY
+
     const res = await fetch(
       `https://api.coingecko.com/api/v3/coins/markets?vs_currency=eur&ids=${ids}&order=market_cap_desc&per_page=20&sparkline=false`,
-      { signal: AbortSignal.timeout(5000) }
+      {
+        signal: AbortSignal.timeout(5000),
+        headers: apiKey ? { 'x-cg-demo-api-key': apiKey } : {},
+      }
     )
-    if (!res.ok) throw new Error()
+    if (!res.ok) throw new Error(`CoinGecko error: ${res.status}`)
     const data = await res.json()
     cachedPrices = data.map((c: Record<string, unknown>) => ({
       id: c.id,
@@ -36,8 +41,9 @@ export async function getMarketPrices(): Promise<CryptoAsset[]> {
     }))
     cacheTs = Date.now()
     return cachedPrices
-  } catch {
-    return MOCK_PRICES // fallback silencieux
+  } catch (err) {
+    console.error('CoinGecko fetch failed:', err)
+    return MOCK_PRICES
   }
 }
 

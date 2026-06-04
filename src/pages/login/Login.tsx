@@ -18,6 +18,7 @@ export default function Login() {
     navigate('/dashboard')
   }, [navigate, profile])
 
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
