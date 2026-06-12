@@ -1,0 +1,264 @@
+/* --- Base Card & Container --- */
+.glass-card-base {
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.tx-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.tx-title-main {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--tx);
+}
+
+/* --- Navigation / Tabs --- */
+.tx-tabs-wrapper {
+  display: flex;
+  gap: 6px;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 5px;
+  width: fit-content;
+}
+
+.tx-tab-btn {
+  padding: 9px 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  color: var(--tx2);
+  transition: all 0.2s;
+}
+
+.tx-tab-btn.active {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+}
+
+/* --- Layout Grid --- */
+.tx-grid-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 20px;
+}
+
+.tx-form-column {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* --- Form Elements --- */
+.tx-form-group {
+  margin-bottom: 16px;
+}
+
+.tx-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--tx3);
+  margin-bottom: 8px;
+}
+
+.tx-select-option {
+  background: var(--bg2);
+}
+
+.tx-input-monospace {
+  font-family: monospace;
+  font-size: 13px;
+}
+
+.tx-address-status {
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.tx-address-valid { color: #10b981; }
+.tx-address-invalid { color: #ef4444; }
+
+.tx-amount-wrapper {
+  position: relative;
+}
+
+.tx-amount-currency {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: 600;
+  color: var(--tx3);
+}
+
+.tx-amount-input {
+  padding-left: 30px;
+}
+
+.tx-amount-hint {
+  font-size: 12px;
+  color: var(--tx3);
+  margin-top: 6px;
+}
+
+/* --- Live Security Score Box --- */
+.tx-score-box {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: var(--glass2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.tx-score-warning {
+  margin-top: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(245, 158, 11, .08);
+  border: 1px solid rgba(245, 158, 11, .2);
+  font-size: 12px;
+  color: #f59e0b;
+}
+
+.tx-warning-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.tx-btn-full {
+  width: 100%;
+  padding: 13px;
+}
+
+/* --- Summary Step --- */
+.tx-summary-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--tx);
+  margin-bottom: 20px;
+}
+
+.tx-summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.tx-summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.tx-summary-key {
+  color: var(--tx3);
+}
+
+.tx-summary-val {
+  font-weight: 600;
+  color: var(--tx);
+}
+
+.tx-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 16px 0;
+}
+
+.tx-summary-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.tx-btn-flex {
+  flex: 1;
+}
+
+.tx-btn-confirm-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.tx-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, .3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* --- Step Done / Success Screen --- */
+.tx-done-wrapper {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.tx-done-card {
+  text-align: center;
+  padding: 40px;
+}
+
+.tx-done-icon {
+  color: #10b981;
+  margin: 0 auto 16px;
+}
+
+.tx-done-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--tx);
+  margin-bottom: 8px;
+}
+
+.tx-done-text {
+  font-size: 13px;
+  color: var(--tx3);
+  margin-bottom: 20px;
+}
+
+.tx-ai-feedback-box {
+  background: rgba(99, 102, 241, .08);
+  border: 1px solid rgba(99, 102, 241, .15);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.tx-ai-feedback-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--pri);
+  margin-bottom: 6px;
+}
+
+.tx-ai-feedback-body {
+  font-size: 13px;
+  color: var(--tx2);
+  line-height: 1.6;
+}

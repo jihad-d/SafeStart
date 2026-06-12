@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { ShoppingCart, Send, ArrowLeftRight, CheckCircle, AlertTriangle } from 'lucide-react'
 import { MOCK_PRICES, fmtEur, fmtCrypto, calcSecurityScore, simulateFees, simulateGas, simulateSlippage, validateAddress } from '@/lib/utils'
@@ -6,10 +6,10 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 import SecurityScoreBadge from '@/components/transactions/SecurityScoreBadge'
 import AIPanel from '@/components/ai/AIPanel'
-import type { PortfolioAsset, SecurityScore, TxType } from '@/types'
+import type { PortfolioAsset, TxType } from '@/types'
 import toast from 'react-hot-toast'
+import './Transactions.css' // Importation des classes CSS
 
-const card: React.CSSProperties = { background: 'var(--glass)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)', borderRadius: 16, padding: 20 }
 const TABS: { type: TxType; label: string; icon: React.ElementType }[] = [
   { type: 'buy',  label: 'Achat',  icon: ShoppingCart },
   { type: 'send', label: 'Envoi',  icon: Send },
@@ -17,12 +17,6 @@ const TABS: { type: TxType; label: string; icon: React.ElementType }[] = [
 ]
 
 const PORTFOLIO_VALUE = 248
-const DEMO_ASSETS = [
-  { id: 'bitcoin',  sym: 'BTC', name: 'Bitcoin',  qty: 0.003821 },
-  { id: 'ethereum', sym: 'ETH', name: 'Ethereum', qty: 0.042 },
-  { id: 'solana',   sym: 'SOL', name: 'Solana',   qty: 0.52 },
-]
-
 type SummaryRow = [string, string]
 
 export default function Transactions() {
@@ -45,22 +39,6 @@ export default function Transactions() {
   const gas = simulateGas()
   const slippage = amount ? simulateSlippage(parseFloat(amount)) : 0
 
-  // const computeScore = useCallback(() => {
-  //   if (!amount || !coin) return
-  //   const s = calcSecurityScore(
-  //     tab, parseFloat(amount),
-  //     profile?.simulated_balance_eur ?? 750,
-  //     PORTFOLIO_VALUE,
-  //     Math.abs(coin.price_change_percentage_24h),
-  //     tab === 'swap' ? slippage : 0,
-  //     tab === 'send' ? validateAddress(address) : true,
-  //   )
-  //   setScore(s)
-  // }, [amount, coin, tab, slippage, address, profile])
-
-  // useEffect(() => { computeScore() }, [computeScore])
-
-  // On calcule le score directement pendant le rendu, pas besoin de useEffect
   const score = (amount && coin) ? calcSecurityScore(
     tab, 
     parseFloat(amount),
@@ -163,76 +141,85 @@ export default function Transactions() {
   const reset = () => { setStep('form'); setAmount(''); setAddress('') }
 
   if (step === 'done') return (
-    <div className="fade-up" style={{ maxWidth: 480, margin: '0 auto' }}>
-      <div style={{ ...card, textAlign: 'center', padding: 40 }}>
-        <CheckCircle size={52} style={{ color: '#10b981', margin: '0 auto 16px' }} />
-        <h2 style={{ fontSize: 22, fontWeight: 700, color: 'var(--tx)', marginBottom: 8 }}>Transaction confirmée !</h2>
-        <p style={{ fontSize: 13, color: 'var(--tx3)', marginBottom: 20 }}>
+    <div className="fade-up tx-done-wrapper">
+      <div className="glass-card-base tx-done-card">
+        <CheckCircle size={52} className="tx-done-icon" />
+        <h2 className="tx-done-title">Transaction confirmée !</h2>
+        <p className="tx-done-text">
           Simulation de {tab === 'buy' ? 'l\'achat' : tab === 'send' ? 'l\'envoi' : 'l\'échange'} de {fmtEur(parseFloat(amount))} enregistrée. +10 pts !
         </p>
-        <div style={{ background: 'rgba(99,102,241,.08)', border: '1px solid rgba(99,102,241,.15)', borderRadius: 12, padding: 14, marginBottom: 20, textAlign: 'left' }}>
-          <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--pri)', marginBottom: 6 }}>💡 SafeBot</p>
-          <p style={{ fontSize: 13, color: 'var(--tx2)', lineHeight: 1.6 }}>
+        <div className="tx-ai-feedback-box">
+          <p className="tx-ai-feedback-title">💡 SafeBot</p>
+          <p className="tx-ai-feedback-body">
             {score?.label === 'safe' && "Excellent choix ! Ton score de sécurité est vert — tu as bien géré le risque. Continue comme ça !"}
             {score?.label === 'warning' && "Transaction enregistrée ! Note que ton score était modéré. La prochaine fois, essaie de réduire le montant pour améliorer ton score."}
             {score?.label === 'danger' && "Transaction enregistrée, mais attention — le score était rouge. Évite d'utiliser une trop grande part de ton solde en une seule opération."}
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button className="btn-glass" style={{ flex: 1 }} onClick={reset}>Nouvelle simulation</button>
-          <button className="btn-pri" style={{ flex: 1 }} onClick={() => navigate('/history')}>Voir l'historique</button>
+        <div className="tx-summary-actions">
+          <button className="btn-glass tx-btn-flex" onClick={reset}>Nouvelle simulation</button>
+          <button className="btn-pri tx-btn-flex" onClick={() => navigate('/history')}>Voir l'historique</button>
         </div>
       </div>
     </div>
   )
 
   return (
-    <div className="fade-up" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--tx)' }}>Simuler une transaction</h1>
+    <div className="fade-up tx-container">
+      <h1 className="tx-title-main">Simuler une transaction</h1>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: 6, background: 'var(--glass)', border: '1px solid var(--border)', borderRadius: 14, padding: 5, width: 'fit-content' }}>
+      <div className="tx-tabs-wrapper">
         {TABS.map(({ type, label, icon: Icon }) => (
-          <button key={type} onClick={() => { setTab(type); setStep('form')}}
-            style={{ padding: '9px 18px', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, border: 'none', transition: 'all .2s', ...(tab === type ? { background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', color: '#fff' } : { background: 'transparent', color: 'var(--tx2)' }) }}>
+          <button 
+            key={type} 
+            onClick={() => { setTab(type); setStep('form')}}
+            className={`tx-tab-btn ${tab === type ? 'active' : ''}`}
+          >
             <Icon size={15} />{label}
           </button>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 20 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div className="tx-grid-layout">
+        <div className="tx-form-column">
 
           {/* FORM */}
           {step === 'form' && (
-            <div style={card}>
+            <div className="glass-card-base">
               {/* Crypto selector */}
-              <div style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.07em', color: 'var(--tx3)', marginBottom: 8 }}>
+              <div className="tx-form-group">
+                <label className="tx-label">
                   {tab === 'swap' ? 'Crypto à échanger' : 'Cryptomonnaie'}
                 </label>
                 <select className="glass-input" value={selectedId} onChange={e => setSelectedId(e.target.value)}>
-                  {MOCK_PRICES.map(c => <option key={c.id} value={c.id} style={{ background: 'var(--bg2)' }}>{c.name} ({c.symbol}) — {fmtEur(c.current_price, c.current_price < 1 ? 4 : 2)}</option>)}
+                  {MOCK_PRICES.map(c => (
+                    <option key={c.id} value={c.id} className="tx-select-option">
+                      {c.name} ({c.symbol}) — {fmtEur(c.current_price, c.current_price < 1 ? 4 : 2)}
+                    </option>
+                  ))}
                 </select>
               </div>
 
               {/* Swap target */}
               {tab === 'swap' && (
-                <div style={{ marginBottom: 16 }}>
-                  <label style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.07em', color: 'var(--tx3)', marginBottom: 8 }}>Crypto de destination</label>
+                <div className="tx-form-group">
+                  <label className="tx-label">Crypto de destination</label>
                   <select className="glass-input" value={swapToId} onChange={e => setSwapToId(e.target.value)}>
-                    {MOCK_PRICES.filter(c => c.id !== selectedId).map(c => <option key={c.id} value={c.id} style={{ background: 'var(--bg2)' }}>{c.name} ({c.symbol})</option>)}
+                    {MOCK_PRICES.filter(c => c.id !== selectedId).map(c => (
+                      <option key={c.id} value={c.id} className="tx-select-option">{c.name} ({c.symbol})</option>
+                    ))}
                   </select>
                 </div>
               )}
 
               {/* Address (send) */}
               {tab === 'send' && (
-                <div style={{ marginBottom: 16 }}>
-                  <label style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.07em', color: 'var(--tx3)', marginBottom: 8 }}>Adresse wallet de destination</label>
-                  <input className="glass-input" style={{ fontFamily: 'monospace', fontSize: 13 }} placeholder="0x... ou adresse Bitcoin" value={address} onChange={e => setAddress(e.target.value)} />
+                <div className="tx-form-group">
+                  <label className="tx-label">Adresse wallet de destination</label>
+                  <input className="glass-input tx-input-monospace" placeholder="0x... ou adresse Bitcoin" value={address} onChange={e => setAddress(e.target.value)} />
                   {address && (
-                    <p style={{ fontSize: 12, marginTop: 6, color: validateAddress(address) ? '#10b981' : '#ef4444' }}>
+                    <p className={`tx-address-status ${validateAddress(address) ? 'tx-address-valid' : 'tx-address-invalid'}`}>
                       {validateAddress(address) ? '✅ Format valide' : '❌ Format invalide — vérifie chaque caractère'}
                     </p>
                   )}
@@ -240,40 +227,40 @@ export default function Transactions() {
               )}
 
               {/* Amount */}
-              <div style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.07em', color: 'var(--tx3)', marginBottom: 8 }}>Montant (€)</label>
-                <div style={{ position: 'relative' }}>
-                  <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontWeight: 600, color: 'var(--tx3)' }}>€</span>
-                  <input className="glass-input" style={{ paddingLeft: 30 }} type="number" min="1" placeholder="0.00" value={amount} onChange={e => setAmount(e.target.value)} />
+              <div className="tx-form-group">
+                <label className="tx-label">Montant (€)</label>
+                <div className="tx-amount-wrapper">
+                  <span className="tx-amount-currency">€</span>
+                  <input className="glass-input tx-amount-input" type="number" min="1" placeholder="0.00" value={amount} onChange={e => setAmount(e.target.value)} />
                 </div>
                 {amount && coin && parseFloat(amount) > 0 && (
-                  <p style={{ fontSize: 12, color: 'var(--tx3)', marginTop: 6 }}>≈ {fmtCrypto(qty, coin.symbol)} au prix de {fmtEur(coin.current_price, coin.current_price < 1 ? 4 : 2)}</p>
+                  <p className="tx-amount-hint">≈ {fmtCrypto(qty, coin.symbol)} au prix de {fmtEur(coin.current_price, coin.current_price < 1 ? 4 : 2)}</p>
                 )}
               </div>
 
               {/* Live score */}
               {score && amount && (
-                <div style={{ marginBottom: 16, padding: 16, background: 'var(--glass2)', border: '1px solid var(--border)', borderRadius: 14 }}>
-                  <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.07em', color: 'var(--tx3)', marginBottom: 12 }}>Score de sécurité</p>
+                <div className="tx-score-box">
+                  <label className="tx-label">Score de sécurité</label>
                   <SecurityScoreBadge score={score} />
                   {score.label !== 'safe' && (
-                    <div style={{ marginTop: 12, display: 'flex', alignItems: 'flex-start', gap: 8, padding: '10px 12px', borderRadius: 10, background: 'rgba(245,158,11,.08)', border: '1px solid rgba(245,158,11,.2)', fontSize: 12, color: '#f59e0b' }}>
-                      <AlertTriangle size={14} style={{ flexShrink: 0, marginTop: 1 }} />
+                    <div className="tx-score-warning">
+                      <AlertTriangle size={14} className="tx-warning-icon" />
                       Vérifie bien les paramètres avant de confirmer.
                     </div>
                   )}
                 </div>
               )}
 
-              <button className="btn-pri" style={{ width: '100%', padding: 13 }} onClick={proceed}>Voir le récapitulatif →</button>
+              <button className="btn-pri tx-btn-full" onClick={proceed}>Voir le récapitulatif →</button>
             </div>
           )}
 
           {/* SUMMARY */}
           {step === 'summary' && score && (
-            <div style={card}>
-              <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--tx)', marginBottom: 20 }}>Récapitulatif</h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+            <div className="glass-card-base">
+              <h2 className="tx-summary-title">Récapitulatif</h2>
+              <div className="tx-summary-list">
                 {[
                   ['Type', tab === 'buy' ? 'Achat simulé' : tab === 'send' ? 'Envoi simulé' : 'Swap simulé'],
                   ['Crypto', `${coin?.name} (${coin?.symbol})`],
@@ -284,18 +271,20 @@ export default function Transactions() {
                   tab === 'swap' ? ['Slippage estimé', `${slippage.toFixed(2)}%`] : null,
                   tab === 'swap' ? ['Reçu estimé', fmtCrypto(parseFloat(amount) / (swapTo?.current_price ?? 1), swapTo?.symbol ?? '')] : null,
                 ].filter((row): row is SummaryRow => row !== null).map(([k, v]) => (
-                  <div key={k as string} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-                    <span style={{ color: 'var(--tx3)' }}>{k}</span>
-                    <span style={{ fontWeight: 600, color: 'var(--tx)' }}>{v}</span>
+                  <div key={k} className="tx-summary-row">
+                    <span className="tx-summary-key">{k}</span>
+                    <span className="tx-summary-val">{v}</span>
                   </div>
                 ))}
               </div>
-              <div style={{ height: 1, background: 'var(--border)', margin: '16px 0' }} />
+              <div className="tx-divider" />
               <SecurityScoreBadge score={score} />
-              <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
-                <button className="btn-glass" style={{ flex: 1 }} onClick={() => setStep('form')}>← Modifier</button>
-                <button className="btn-pri" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }} onClick={confirm} disabled={confirming}>
-                  {confirming ? <span style={{ width: 18, height: 18, border: '2px solid rgba(255,255,255,.3)', borderTopColor: '#fff', borderRadius: '50%', display: 'inline-block' }} className="spin" /> : '✅ Confirmer'}
+              <div className="tx-summary-actions">
+                <button className="btn-glass tx-btn-flex" onClick={() => setStep('form')}>← Modifier</button>
+                <button className="btn-pri tx-btn-flex" onClick={confirm} disabled={confirming}>
+                  <div className="tx-btn-confirm-content">
+                    {confirming ? <span className="tx-spinner spin" /> : '✅ Confirmer'}
+                  </div>
                 </button>
               </div>
             </div>
