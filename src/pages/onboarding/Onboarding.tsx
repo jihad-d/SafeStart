@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronRight, CheckCircle, XCircle } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
+import './Onboarding.css'
 
 const QUESTIONS = [
   { q: "Qu'est-ce qu'un wallet crypto ?", opts: ["Un compte bancaire classique", "Un portefeuille numérique pour stocker et envoyer des cryptos", "Un site d'achat en ligne", "Une monnaie physique"], correct: 1, exp: "Un wallet est une application qui te permet de stocker, envoyer et recevoir des cryptomonnaies. Tu en es le seul propriétaire." },
@@ -52,43 +53,41 @@ export default function Onboarding() {
   const pct = finalScore / QUESTIONS.length
   const levelInfo = pct >= 0.8 ? LEVELS[2] : pct >= 0.5 ? LEVELS[1] : LEVELS[0]
 
-  const wrap: React.CSSProperties = { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, position: 'relative', zIndex: 1 }
-
   if (phase === 'intro') return (
-    <div style={wrap}>
-      <div className="glass-card fade-up" style={{ maxWidth: 480, width: '100%', textAlign: 'center', padding: 40 }}>
-        <div style={{ fontSize: 52, marginBottom: 16 }}>🎯</div>
-        <h1 style={{ fontSize: 26, fontWeight: 700, color: 'var(--tx)', marginBottom: 12 }}>Évaluation de niveau</h1>
-        <p style={{ fontSize: 14, color: 'var(--tx2)', lineHeight: 1.7, marginBottom: 24 }}>
+    <div className="ob-wrap">
+      <div className="glass-card fade-up ob-card-intro">
+        <div className="ob-intro-emoji">🎯</div>
+        <h1 className="ob-intro-title">Évaluation de niveau</h1>
+        <p className="ob-intro-desc">
           Réponds à <strong>{QUESTIONS.length} questions rapides</strong> sur la crypto.<br/>
           Pas de pression — c'est pour adapter SafeStart à toi. 😊
         </p>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'var(--glass2)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 16px', marginBottom: 24, textAlign: 'left' }}>
-          <span style={{ fontSize: 24 }}>⏱️</span>
+        <div className="ob-intro-info-box">
+          <span className="ob-intro-info-emoji">⏱️</span>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx)' }}>Environ 2 minutes</div>
-            <div style={{ fontSize: 12, color: 'var(--tx3)' }}>Tu peux refaire l'évaluation depuis les paramètres</div>
+            <div className="ob-intro-info-title">Environ 2 minutes</div>
+            <div className="ob-intro-info-subtitle">Tu peux refaire l'évaluation depuis les paramètres</div>
           </div>
         </div>
-        <button className="btn-pri" style={{ width: '100%', padding: 13 }} onClick={() => setPhase('quiz')}>
-          Commencer l'évaluation <ChevronRight size={16} style={{ display: 'inline' }} />
+        <button className="btn-pri ob-full-btn" onClick={() => setPhase('quiz')}>
+          Commencer l'évaluation <ChevronRight size={16} className="ob-inline-icon" />
         </button>
       </div>
     </div>
   )
 
   if (phase === 'result') return (
-    <div style={wrap}>
-      <div className="glass-card fade-up" style={{ maxWidth: 480, width: '100%', textAlign: 'center', padding: 40 }}>
-        <div style={{ fontSize: 60, marginBottom: 12 }}>{levelInfo.emoji}</div>
-        <h2 style={{ fontSize: 26, fontWeight: 700, color: 'var(--tx)', marginBottom: 6 }}>{levelInfo.label}</h2>
-        <div style={{ fontSize: 13, color: 'var(--tx3)', marginBottom: 16 }}>{finalScore} / {QUESTIONS.length} bonnes réponses</div>
-        <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,.08)', overflow: 'hidden', marginBottom: 20 }}>
-          <div style={{ height: '100%', borderRadius: 3, background: 'linear-gradient(90deg,#6366f1,#8b5cf6)', width: `${(finalScore/QUESTIONS.length)*100}%`, transition: 'width 1s' }} />
+    <div className="ob-wrap">
+      <div className="glass-card fade-up ob-card-result">
+        <div className="ob-result-emoji">{levelInfo.emoji}</div>
+        <h2 className="ob-result-title">{levelInfo.label}</h2>
+        <div className="ob-result-score">{finalScore} / {QUESTIONS.length} bonnes réponses</div>
+        <div className="ob-progress-container ob-mb-20">
+          <div className="ob-progress-bar-fill-result" style={{ width: `${(finalScore/QUESTIONS.length)*100}%` }} />
         </div>
-        <div style={{ background: 'rgba(99,102,241,.08)', border: '1px solid rgba(99,102,241,.15)', borderRadius: 12, padding: 16, marginBottom: 24, textAlign: 'left' }}>
-          <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 6, color: 'var(--pri)' }}>💡 SafeBot</div>
-          <p style={{ fontSize: 13, color: 'var(--tx2)', lineHeight: 1.6 }}>
+        <div className="ob-result-message-box">
+          <div className="ob-safebot-title">💡 SafeBot</div>
+          <p className="ob-safebot-text">
             Bienvenue sur SafeStart ! Ton profil <strong>"{levelInfo.label}"</strong> a été enregistré.
             {levelInfo.id === 'absolute_beginner' && " Je vais t'expliquer chaque concept avec des exemples simples du quotidien."}
             {levelInfo.id === 'curious_novice' && " Je vais approfondir tes connaissances progressivement."}
@@ -96,7 +95,7 @@ export default function Onboarding() {
             {" Commence par simuler ton premier achat crypto ! 🚀"}
           </p>
         </div>
-        <button className="btn-pri" style={{ width: '100%', padding: 13 }} onClick={() => navigate('/dashboard')}>
+        <button className="btn-pri ob-full-btn" onClick={() => navigate('/dashboard')}>
           Accéder à mon tableau de bord
         </button>
       </div>
@@ -104,50 +103,50 @@ export default function Onboarding() {
   )
 
   return (
-    <div style={wrap}>
-      <div style={{ maxWidth: 520, width: '100%' }} className="fade-up">
-        <div style={{ marginBottom: 20 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--tx3)', marginBottom: 8 }}>
+    <div className="ob-wrap">
+      <div className="fade-up ob-quiz-container">
+        <div className="ob-quiz-header">
+          <div className="ob-quiz-meta">
             <span>Question {cur + 1} / {QUESTIONS.length}</span>
             <span>{Math.round(progress)}%</span>
           </div>
-          <div style={{ height: 4, borderRadius: 2, background: 'rgba(255,255,255,.08)', overflow: 'hidden' }}>
-            <div style={{ height: '100%', borderRadius: 2, background: 'linear-gradient(90deg,#6366f1,#8b5cf6)', width: `${progress}%`, transition: 'width .5s' }} />
+          <div className="ob-progress-container">
+            <div className="ob-progress-bar-fill-quiz" style={{ width: `${progress}%` }} />
           </div>
         </div>
 
-        <div className="glass-card" style={{ padding: 28 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--tx)', marginBottom: 20 }}>{q.q}</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div className="glass-card ob-quiz-card">
+          <h2 className="ob-quiz-question">{q.q}</h2>
+          <div className="ob-quiz-options-list">
             {q.opts.map((opt, i) => {
-              let bg = 'var(--glass)', border = 'var(--border)', color = 'var(--tx2)'
+              let state = 'default'
               if (selected !== null) {
-                if (i === q.correct) { bg = 'rgba(16,185,129,.12)'; border = 'rgba(16,185,129,.4)'; color = '#10b981' }
-                else if (i === selected) { bg = 'rgba(239,68,68,.12)'; border = 'rgba(239,68,68,.4)'; color = '#ef4444' }
+                if (i === q.correct) state = 'correct'
+                else if (i === selected) state = 'wrong'
               }
               return (
                 <button key={i} onClick={() => pick(i)} disabled={selected !== null}
-                  style={{ width: '100%', textAlign: 'left', padding: '12px 16px', borderRadius: 12, background: bg, border: `1px solid ${border}`, color, fontSize: 14, fontFamily: 'inherit', cursor: selected !== null ? 'default' : 'pointer', transition: 'all .2s', display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ width: 26, height: 26, borderRadius: 8, background: 'rgba(255,255,255,.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{['A','B','C','D'][i]}</span>
+                  className="ob-quiz-option-btn" data-state={state}>
+                  <span className="ob-option-letter">{['A','B','C','D'][i]}</span>
                   <span>{opt}</span>
-                  {selected !== null && i === q.correct && <CheckCircle size={16} style={{ marginLeft: 'auto', color: '#10b981', flexShrink: 0 }} />}
-                  {selected !== null && i === selected && i !== q.correct && <XCircle size={16} style={{ marginLeft: 'auto', color: '#ef4444', flexShrink: 0 }} />}
+                  {selected !== null && i === q.correct && <CheckCircle size={16} className="ob-option-status-icon icon-correct" />}
+                  {selected !== null && i === selected && i !== q.correct && <XCircle size={16} className="ob-option-status-icon icon-wrong" />}
                 </button>
               )
             })}
           </div>
 
           {showExp && (
-            <div style={{ marginTop: 16, padding: 14, borderRadius: 12, background: 'rgba(99,102,241,.08)', border: '1px solid rgba(99,102,241,.15)' }} className="fade-up">
-              <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--pri)', marginBottom: 4 }}>
+            <div className="ob-explanation-box fade-up">
+              <p className="ob-explanation-status">
                 {selected === q.correct ? '✅ Bonne réponse !' : '❌ Pas tout à fait...'}
               </p>
-              <p style={{ fontSize: 13, color: 'var(--tx2)', lineHeight: 1.6 }}>{q.exp}</p>
+              <p className="ob-explanation-text">{q.exp}</p>
             </div>
           )}
 
           {selected !== null && (
-            <button className="btn-pri fade-up" style={{ width: '100%', padding: 13, marginTop: 16 }} onClick={next}>
+            <button className="btn-pri fade-up ob-next-btn" onClick={next}>
               {cur < QUESTIONS.length - 1 ? 'Question suivante' : 'Voir mon résultat'} →
             </button>
           )}
