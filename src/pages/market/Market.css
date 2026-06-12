@@ -1,0 +1,195 @@
+.market-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.market-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.market-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--tx);
+}
+
+.market-subtitle {
+  font-size: 12px;
+  color: var(--tx3);
+  margin-top: 4px;
+}
+
+.market-refresh-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.market-search-wrapper {
+  position: relative;
+  max-width: 320px;
+}
+
+.market-search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--tx3);
+}
+
+.market-search-input {
+  padding-left: 40px;
+}
+
+.market-table-container {
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.market-table-header {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.market-table-header-cell {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--tx3);
+}
+
+.market-table-header-cell.text-right {
+  text-align: right;
+}
+
+.market-table-header-cell.text-left {
+  text-align: left;
+}
+
+.market-skeleton-container {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.market-skeleton-row {
+  height: 52px;
+  border-radius: 12px;
+  background: var(--glass2);
+  animation: pulse 1.5s infinite;
+}
+
+.market-table-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 12px;
+  padding: 14px 20px;
+  align-items: center;
+  cursor: pointer;
+  transition: background .15s;
+  background: transparent;
+}
+
+.market-table-row:hover {
+  background: var(--glass2);
+}
+
+.market-table-row.border-bottom {
+  border-bottom: 1px solid var(--border);
+}
+
+.market-table-row.border-none {
+  border-bottom: none;
+}
+
+.market-coin-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.market-coin-image {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.market-coin-placeholder {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.market-coin-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--tx);
+}
+
+.market-coin-symbol {
+  font-size: 11px;
+  color: var(--tx3);
+}
+
+.market-coin-price {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--tx);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.market-coin-trend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.trend-positive {
+  font-size: 13px;
+  font-weight: 600;
+  color: #10b981;
+}
+
+.trend-negative {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ef4444;
+}
+
+.market-action-cell {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.market-action-btn {
+  font-size: 12px;
+  padding: '6px 12px';
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
