@@ -1,0 +1,182 @@
+/* --- Conteneur Principal --- */
+.register-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+/* --- Logo & Marque --- */
+.register-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 32px;
+  text-decoration: none;
+}
+
+.register-logo-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 800;
+  font-size: 20px;
+}
+
+.register-brand {
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--tx);
+}
+
+/* --- En-tête de la Carte --- */
+.register-card-width {
+  width: 100%;
+  max-width: 420px;
+}
+
+.register-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--tx);
+}
+
+.register-subtitle {
+  font-size: 13px;
+  color: var(--tx3);
+  margin-bottom: 24px;
+}
+
+/* --- Messages d'erreur --- */
+.register-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  background: rgba(239, 68, 68, .1);
+  border: 1px solid rgba(239, 68, 68, .2);
+  color: var(--danger);
+  font-size: 13px;
+}
+
+/* --- Formulaire --- */
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.register-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--tx3);
+  margin-bottom: 6px;
+}
+
+.password-input-wrapper {
+  position: relative;
+}
+
+.password-input-padding {
+  padding-right: 44px;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--tx3);
+}
+
+/* --- Force du mot de passe --- */
+.strength-indicator-row {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.strength-bar-container {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+
+.strength-bar {
+  height: 4px;
+  border-radius: 2px;
+  flex: 1;
+  transition: all .3s;
+}
+
+.strength-label {
+  font-size: 11px;
+}
+
+/* --- CGU / Case à cocher --- */
+.cgu-label-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.cgu-checkbox {
+  margin-top: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.cgu-text {
+  font-size: 13px;
+  color: var(--tx2);
+}
+
+/* --- Bouton Soumettre --- */
+.register-btn-submit {
+  width: 100%;
+  padding: 13px;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, .3);
+  border-top-color: #fff;
+  border-radius: 50%;
+}
+
+/* --- Footer de la Carte --- */
+.register-footer-text {
+  text-align: center;
+  font-size: 13px;
+  color: var(--tx3);
+  margin-top: 20px;
+}
