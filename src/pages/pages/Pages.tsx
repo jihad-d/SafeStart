@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { fmtEur } from '@/lib/utils'
 import type { Transaction } from '@/types'
 import toast from 'react-hot-toast'
-import './styles.css' // Importation du fichier CSS propre
+import './Pages.css' 
 
 // ─── UTILS HISTORY 
 const txColor = (t: string) => t === 'buy' ? '#10b981' : t === 'send' ? '#ef4444' : '#6366f1'

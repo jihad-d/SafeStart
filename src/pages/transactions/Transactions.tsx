@@ -8,7 +8,7 @@ import SecurityScoreBadge from '@/components/transactions/SecurityScoreBadge'
 import AIPanel from '@/components/ai/AIPanel'
 import type { PortfolioAsset, TxType } from '@/types'
 import toast from 'react-hot-toast'
-import './Transactions.css' // Importation des classes CSS
+import './Transactions.css' 
 
 const TABS: { type: TxType; label: string; icon: React.ElementType }[] = [
   { type: 'buy',  label: 'Achat',  icon: ShoppingCart },

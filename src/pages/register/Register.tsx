@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
 import toast from 'react-hot-toast'
-import './Register.css' // Importation des styles extraits
+import './Register.css' 
 
 export default function Register() {
   const { signUp } = useAuth()
