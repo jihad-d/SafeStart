@@ -68,7 +68,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   // ─── Fetch profil avec retry ──────────────────────────────────────────────
-  const fetchProfileWithRetry = async (id: string, retries = 5, delayMs = 600): Promise<UserProfile | null> => {
+  // Augmenté à 8 retries × 800ms = ~6.4s max pour laisser le temps
+  // au trigger Supabase de créer le profil après confirmation email
+  const fetchProfileWithRetry = async (id: string, retries = 8, delayMs = 800): Promise<UserProfile | null> => {
     for (let i = 0; i < retries; i++) {
       const result = await fetchProfile(id)
       if (result) return result
@@ -90,8 +92,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const { data: { session } } = await client.auth.getSession()
         if (session?.user) {
-          const loadedProfile = await fetchProfile(session.user.id)
-          if (!loadedProfile) setProfile(null)
+          // fetchProfileWithRetry ici aussi : au cas où l'utilisateur arrive
+          // via un lien de confirmation email et que le profil n'est pas encore créé
+          const loadedProfile = await fetchProfileWithRetry(session.user.id)
+          if (!loadedProfile) {
+            const fallback = buildDefaultProfile(session.user.id, session.user.email ?? '')
+            await client.from('profiles').upsert(fallback)
+            setProfile(fallback)
+          }
         }
       } catch (error) {
         console.error('auth init error:', error)
@@ -103,15 +111,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     init()
 
     const { data: listener } = client.auth.onAuthStateChange(async (event, session) => {
+      // INITIAL_SESSION est géré dans init() ci-dessus
       if (event === 'INITIAL_SESSION') return
 
       if (!session?.user) {
         setProfile(null)
+        setLoading(false)
         return
       }
 
-      const loadedProfile = await fetchProfile(session.user.id)
-      if (!loadedProfile) setProfile(null)
+      // SIGNED_IN peut venir d'une confirmation email → trigger pas encore exécuté
+      // → profil absent → on retry + fallback création si besoin
+      if (
+        event === 'SIGNED_IN' ||
+        event === 'TOKEN_REFRESHED' ||
+        (event as string) === 'USER_UPDATED'
+      ) {
+        const loadedProfile = await fetchProfileWithRetry(session.user.id)
+        if (loadedProfile) return
+
+        // Toujours rien après tous les retries → on crée le profil manuellement
+        const fallback = buildDefaultProfile(session.user.id, session.user.email ?? '')
+        const { error: upsertError } = await client.from('profiles').upsert(fallback)
+        if (!upsertError) setProfile(fallback)
+      }
     })
 
     return () => {
@@ -132,7 +155,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) return { error: error.message }
       if (!data.user) return { error: 'Utilisateur introuvable apres connexion.' }
 
-      const loadedProfile = await fetchProfile(data.user.id)
+      const loadedProfile = await fetchProfileWithRetry(data.user.id)
       if (loadedProfile) return { error: null }
 
       // Fallback : le profil n'existe pas encore, on le crée

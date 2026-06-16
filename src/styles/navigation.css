@@ -33,3 +33,25 @@
 .nav-item.active svg {
   color: var(--pri2);
 }
+
+/* ═══════════════
+   RESPONSIVE 
+   ═══════════════ */
+@media (max-width: 768px) {
+  .nav-item {
+    justify-content: center;
+    padding: 0;              
+    gap: 0;                  
+    font-size: 0;            
+    width: 44px;             
+    height: 44px;
+    border-radius: 12px;     
+    margin: 0 auto;          
+  }
+
+  .nav-item svg {
+    width: 20px;             
+    height: 20px;
+    flex-shrink: 0;          
+  }
+}
