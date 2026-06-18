@@ -1,3 +1,4 @@
+/* ── Layout principal ── */
 .market-container {
   display: flex;
   flex-direction: column;
@@ -35,6 +36,14 @@
   max-width: 320px;
 }
 
+/* Force l'input à prendre toute la largeur sur mobile si nécessaire */
+@media (max-width: 576px) {
+  .market-search-wrapper {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
 .market-search-icon {
   position: absolute;
   left: 14px;
@@ -47,6 +56,7 @@
   padding-left: 40px;
 }
 
+/* ── Table Container ── */
 .market-table-container {
   background: var(--glass);
   backdrop-filter: blur(20px);
@@ -79,6 +89,7 @@
   text-align: left;
 }
 
+/* ── Skeletons ── */
 .market-skeleton-container {
   padding: 24px;
   display: flex;
@@ -93,6 +104,7 @@
   animation: pulse 1.5s infinite;
 }
 
+/* ── Table Rows ── */
 .market-table-row {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr;
@@ -188,8 +200,61 @@
 
 .market-action-btn {
   font-size: 12px;
-  padding: '6px 12px';
+  padding: 6px 12px;
   display: flex;
   align-items: center;
   gap: 5px;
+}
+
+
+/* ════════════
+   RESPONSIVE 
+   ════════════ */
+@media (max-width: 576px) {
+  
+  .market-table-header {
+    display: none;
+  }
+
+  .market-table-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .market-coin-info {
+    flex: 1;
+    min-width: 50%;
+  }
+
+  .market-coin-image, .market-coin-placeholder {
+    width: 32px; 
+    height: 32px;
+  }
+
+  .market-coin-price {
+    flex-shrink: 0;
+    text-align: right;
+    font-size: 15px;
+  }
+
+  .market-coin-trend {
+    width: 45%;
+    justify-content: flex-start; 
+    padding-left: 44px; 
+    margin-top: -4px;
+  }
+
+  .market-action-cell {
+    width: 45%;
+    justify-content: flex-end;
+  }
+
+  .market-action-btn {
+    padding: 6px 14px;
+    width: auto;
+  }
 }
