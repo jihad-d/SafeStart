@@ -249,3 +249,60 @@
   display: inline-block;
   margin-top: 2px;
 }
+
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE — Tableau de bord (< 992px et < 576px)
+   ═══════════════════════════════════════════════ */
+
+/* Pour tablettes et petits écrans d'ordinateurs (Passage de la grille principale sur 1 colonne) */
+@media (max-width: 992px) {
+  .dashboard-main {
+    grid-template-columns: 1fr; /* L'AIPanel passe proprement sous le Portfolio */
+  }
+}
+
+/* Pour Mobiles et Smartphones */
+@media (max-width: 576px) {
+  .dashboard {
+    gap: 16px; /* On réduit légèrement l'espacement global */
+  }
+
+  .dashboard-header {
+    flex-direction: column; /* Aligne le titre et le bouton verticalement */
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .dashboard-title {
+    font-size: 24px; /* Un titre un peu plus compact pour éviter les retours à la ligne brutaux */
+  }
+
+  .dashboard-simulate-btn {
+    margin-top: 0;
+    justify-content: center; /* Le bouton prend toute la largeur de manière harmonieuse */
+    padding: 12px;
+  }
+
+  .dashboard-stats {
+    grid-template-columns: 1fr; /* Les cartes de statistiques s'empilent au lieu de s'écraser */
+    gap: 10px;
+  }
+
+  .stat-card-value {
+    font-size: 26px; /* Légère réduction de la taille des chiffres */
+  }
+
+  /* Ajustements pour que les lignes de cryptos ne débordent pas */
+  .portfolio-asset, .recent-tx {
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .portfolio-asset-name, .recent-tx-label {
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Coupe le texte proprement s'il est trop long */
+  }
+}
