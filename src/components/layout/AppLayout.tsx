@@ -3,7 +3,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Wallet, TrendingUp, ArrowLeftRight,
   Clock, BookOpen, Trophy, BarChart3, HelpCircle,
-  Settings, LogOut, Zap, Bell, Sun, Moon, Menu, X // 🌟 NOUVEAU : Ajout de Menu et X pour les icônes
+  Settings, LogOut, Zap, Bell, Sun, Moon, Menu, X 
 } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { fmtEur } from '@/lib/utils'
@@ -129,7 +129,7 @@ export default function AppLayout() {
           <NavLink to="/help"     className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} style={{ marginBottom:2 }}><HelpCircle size={15} />Aide & FAQ</NavLink>
           <NavLink to="/settings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} style={{ marginBottom:2 }}><Settings size={15} />Paramètres</NavLink>
           <button className="nav-item" style={{ width:'100%', color:'#ef4444', border:'none', background:'transparent', cursor:'pointer' }}
-            onClick={() => { signOut(); navigate('/login') }}>
+            onClick={async () => { await signOut(); navigate('/login') }}>
             <LogOut size={15} />Déconnexion
           </button>
         </div>
