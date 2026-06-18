@@ -55,6 +55,7 @@
 .stat-value-gradient {
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
   background-clip: text;
+  -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -161,4 +162,77 @@
 .asset-pnl-percentage {
   font-size: 12px;
   font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE — Écran Portefeuille (< 992px & < 576px)
+   ═══════════════════════════════════════════════ */
+
+/* Tablettes : L'IA glisse sous la liste des crypto-actifs */
+@media (max-width: 992px) {
+  .wallet-main-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Mobiles : Empilement des stats et ajustements des lignes */
+@media (max-width: 576px) {
+  .wallet-header {
+    flex-direction: row; /* On maintient l'alignement mais on réduit l'espace */
+    align-items: center;
+  }
+
+  .wallet-title {
+    font-size: 20px;
+  }
+
+  /* Les trois boîtes de solde s'empilent proprement verticalement */
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .wallet-card {
+    padding: 16px; /* On gagne un peu d'espace intérieur */
+  }
+
+  .stat-value {
+    font-size: 22px;
+  }
+
+  /* Gestion de l'en-tête de la liste d'actifs */
+  .assets-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .assets-link-btn {
+    justify-content: center;
+    padding: 10px;
+  }
+
+  /* Compression des éléments de la liste de cryptos pour éviter l'écrasement */
+  .asset-item {
+    gap: 10px;
+    padding: 12px 10px;
+  }
+
+  .asset-icon-wrapper {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  .asset-name {
+    font-size: 13px;
+  }
+
+  .asset-fiat-val {
+    font-size: 13px;
+  }
+  
+  .asset-qty, .asset-pnl-percentage {
+    font-size: 11px;
+  }
 }
