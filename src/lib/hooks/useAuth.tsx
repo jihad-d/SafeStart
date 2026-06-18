@@ -18,7 +18,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // ─── Utilitaire timeout ───────────────────────────────────────────────────
+  // Utilitaire timeout
   const withTimeout = async <T,>(promise: Promise<T>, ms: number, message: string): Promise<T> => {
     let timeoutId: number | undefined
     const timeoutPromise = new Promise<never>((_, reject) => {
@@ -31,7 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  // ─── Profil par défaut ────────────────────────────────────────────────────
+  // Profil par défaut 
   const buildDefaultProfile = (id: string, email: string): UserProfile => ({
     id,
     email,
@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     ai_messages_limit: 20,
   })
 
-  // ─── Fetch profil ─────────────────────────────────────────────────────────
+  // Fetch profil 
   const fetchProfile = async (id: string): Promise<UserProfile | null> => {
     if (!supabase) return null
 
@@ -67,9 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return nextProfile
   }
 
-  // ─── Fetch profil avec retry ──────────────────────────────────────────────
-  // Augmenté à 8 retries × 800ms = ~6.4s max pour laisser le temps
-  // au trigger Supabase de créer le profil après confirmation email
+  // Fetch profil avec retry
   const fetchProfileWithRetry = async (id: string, retries = 8, delayMs = 800): Promise<UserProfile | null> => {
     for (let i = 0; i < retries; i++) {
       const result = await fetchProfile(id)
@@ -79,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return null
   }
 
-  // ─── Init session ─────────────────────────────────────────────────────────
+  // Init session
   useEffect(() => {
     if (!supabase) {
       setLoading(false)
@@ -92,8 +90,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const { data: { session } } = await client.auth.getSession()
         if (session?.user) {
-          // fetchProfileWithRetry ici aussi : au cas où l'utilisateur arrive
-          // via un lien de confirmation email et que le profil n'est pas encore créé
           const loadedProfile = await fetchProfileWithRetry(session.user.id)
           if (!loadedProfile) {
             const fallback = buildDefaultProfile(session.user.id, session.user.email ?? '')
@@ -120,8 +116,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return
       }
 
-      // SIGNED_IN peut venir d'une confirmation email → trigger pas encore exécuté
-      // → profil absent → on retry + fallback création si besoin
       if (
         event === 'SIGNED_IN' ||
         event === 'TOKEN_REFRESHED' ||
@@ -130,7 +124,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const loadedProfile = await fetchProfileWithRetry(session.user.id)
         if (loadedProfile) return
 
-        // Toujours rien après tous les retries → on crée le profil manuellement
         const fallback = buildDefaultProfile(session.user.id, session.user.email ?? '')
         const { error: upsertError } = await client.from('profiles').upsert(fallback)
         if (!upsertError) setProfile(fallback)
@@ -142,7 +135,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  // ─── Sign In ──────────────────────────────────────────────────────────────
+  // Sign In 
   const signIn = async (email: string, password: string) => {
     if (!supabase) return { error: 'Configuration Supabase manquante.' }
 
@@ -158,7 +151,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const loadedProfile = await fetchProfileWithRetry(data.user.id)
       if (loadedProfile) return { error: null }
 
-      // Fallback : le profil n'existe pas encore, on le crée
       const fallbackProfile = buildDefaultProfile(data.user.id, data.user.email ?? email)
       const { error: upsertError } = await supabase.from('profiles').upsert(fallbackProfile)
       if (upsertError) return { error: 'Erreur creation profil: ' + upsertError.message }
@@ -170,7 +162,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  // ─── Sign Up ──────────────────────────────────────────────────────────────
+  // Sign Up 
   const signUp = async (email: string, password: string) => {
     if (!supabase) {
       return { error: 'Supabase n est pas configure. Ajoute .env.local pour activer l inscription.' }
@@ -201,13 +193,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  // ─── Sign Out ─────────────────────────────────────────────────────────────
+  // Sign Out 
   const signOut = async () => {
     if (supabase) await supabase.auth.signOut()
     setProfile(null)
   }
 
-  // ─── Update profil ────────────────────────────────────────────────────────
+  // Update profil 
   const updateProfile = async (data: Partial<UserProfile>) => {
     if (!profile) return
     const updated = { ...profile, ...data }
