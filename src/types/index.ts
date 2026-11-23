@@ -12,6 +12,8 @@ export interface UserProfile {
   is_premium: boolean
   ai_messages_today: number
   ai_messages_limit: number
+  /** Date (UTC, AAAA-MM-JJ) du dernier message compté — le compteur repart à 0 chaque jour. */
+  ai_messages_date?: string
 }
 
 export interface CryptoAsset {

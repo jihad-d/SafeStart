@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Send } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { askSafeBot } from '../../lib/ai'
+import { askSafeBot, SafeBotLimitError } from '@/lib/ai'
 
 interface Message { role: 'user' | 'bot'; content: string }
 
 export default function AIPanel({ initialMessage, className = '' }: { initialMessage?: string; className?: string }) {
-  const { profile } = useAuth()
+  const { profile, patchProfile } = useAuth()
   const [messages, setMessages] = useState<Message[]>(
     initialMessage ? [{ role: 'bot', content: initialMessage }] : []
   )
@@ -24,19 +24,27 @@ export default function AIPanel({ initialMessage, className = '' }: { initialMes
     setTyping(true)
 
     try {
-      const answer = await askSafeBot(q)
+      const { answer, used, limit } = await askSafeBot(q)
       setMessages(p => [...p, { role: 'bot', content: answer }])
+      patchProfile({ ai_messages_today: used, ai_messages_limit: limit, ai_messages_date: new Date().toISOString().slice(0, 10) })
     } catch (err) {
+      if (err instanceof SafeBotLimitError) {
+        patchProfile({ ai_messages_today: profile?.ai_messages_limit ?? 20, ai_messages_date: new Date().toISOString().slice(0, 10) })
+      }
       setMessages(p => [...p, {
         role: 'bot',
-        content: "Désolé, je rencontre un problème. Réessaie dans un instant ! 🔧"
+        content: err instanceof SafeBotLimitError
+          ? "Tu as atteint ta limite de messages pour aujourd'hui. Reviens demain ! 🌙"
+          : "Désolé, je rencontre un problème. Réessaie dans un instant ! 🔧"
       }])
     } finally {
       setTyping(false)
     }
   }
 
-  const limitReached = (profile?.ai_messages_today ?? 0) >= (profile?.ai_messages_limit ?? 20)
+  const today = new Date().toISOString().slice(0, 10)
+  const usedToday = profile?.ai_messages_date && profile.ai_messages_date < today ? 0 : (profile?.ai_messages_today ?? 0)
+  const limitReached = usedToday >= (profile?.ai_messages_limit ?? 20)
 
   return (
     <div className={className} style={{
@@ -114,6 +122,7 @@ export default function AIPanel({ initialMessage, className = '' }: { initialMes
             style={{ fontSize: 13, padding: '10px 14px', flex: 1, borderRadius: 12 }}
             placeholder="Pose une question..."
             value={input}
+            maxLength={500}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && send()}
           />
@@ -121,6 +130,8 @@ export default function AIPanel({ initialMessage, className = '' }: { initialMes
             className="btn-pri"
             style={{ flexShrink: 0, width: 38, height: 38, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 12 }}
             onClick={send}
+            disabled={typing || !input.trim()}
+            aria-label="Envoyer"
           >
             <Send size={14} />
           </button>

@@ -35,15 +35,15 @@
 
 ```bash
 # 1. Cloner le dépôt
-git clone https://github.com/ton-org/safestart.git
-cd safestart
+git clone https://github.com/jihad-d/SafeStart.git
+cd SafeStart
 
 # 2. Installer les dépendances
 npm install
 
 # 3. Configurer les variables d'environnement
-cp .env.example .env
-# → Édite .env et renseigne VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY
+cp .env.example .env.local
+# → Édite .env.local et renseigne VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY
 
 # 4. Lancer le serveur de développement
 npm run dev
@@ -158,14 +158,18 @@ Ajoute la classe `.light` sur `<html>` pour activer le thème clair (géré par 
 
 ## ⚙️ Variables d'environnement
 
-Copie `.env.example` → `.env` et renseigne :
+Copie `.env.example` → `.env.local` et renseigne :
 
-```env
-VITE_SUPABASE_URL=https://xxxx.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
+| Variable | Où | Rôle |
+|---|---|---|
+| `VITE_SUPABASE_URL` | navigateur | URL du projet Supabase |
+| `VITE_SUPABASE_ANON_KEY` | navigateur | Clé publique (anon) Supabase |
+| `ANTHROPIC_API_KEY` | **serveur** | Clé IA utilisée par `/api/safebot` |
+| `SUPABASE_SERVICE_ROLE_KEY` | **serveur** | Vérifie la session et décompte le quota SafeBot |
 
-> ⚠️ Ces valeurs sont exposées côté client. Utilise les **Row Level Security** policies Supabase pour protéger tes données.
+> ⚠️ Tout ce qui commence par `VITE_` est inclus dans le JavaScript envoyé aux visiteurs. Ne mets **jamais** de clé secrète derrière ce préfixe.
+>
+> En production, ajoute les variables serveur dans Vercel → *Settings → Environment Variables*. En local, `npm run dev` sert aussi `/api/safebot`.
 
 ---
 
@@ -184,6 +188,9 @@ Le hook `useAuth` attend une table `profiles` avec les colonnes suivantes :
 | `onboarding_completed` | `bool` | Onboarding terminé ? |
 | `ai_messages_today` | `int` | Messages SafeBot du jour |
 | `ai_messages_limit` | `int` | Limite journalière (défaut: 20) |
+| `ai_messages_date` | `date` | Jour du dernier message compté (remise à zéro quotidienne) |
+
+Exécute ensuite [`supabase/migrations/20261123_safebot_quota_and_transactions.sql`](supabase/migrations/20261123_safebot_quota_and_transactions.sql) dans *Supabase → SQL Editor* : il ajoute la colonne `ai_messages_date`, la fonction de quota SafeBot et l'enregistrement atomique des transactions simulées.
 
 ---
 

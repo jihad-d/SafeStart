@@ -9,6 +9,8 @@ interface AuthCtx {
   signUp: (email: string, password: string) => Promise<{ error: string | null; needsEmailConfirmation?: boolean }>
   signOut: () => Promise<void>
   updateProfile: (data: Partial<UserProfile>) => Promise<void>
+  /** Met à jour le profil en mémoire uniquement (valeurs déjà écrites côté serveur). */
+  patchProfile: (data: Partial<UserProfile>) => void
 }
 
 const Ctx = createContext<AuthCtx>(null!)
@@ -209,8 +211,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const patchProfile = (data: Partial<UserProfile>) => {
+    setProfile(prev => (prev ? { ...prev, ...data } : prev))
+  }
+
   return (
-    <Ctx.Provider value={{ profile, loading, signIn, signUp, signOut, updateProfile }}>
+    <Ctx.Provider value={{ profile, loading, signIn, signUp, signOut, updateProfile, patchProfile }}>
       {children}
     </Ctx.Provider>
   )
