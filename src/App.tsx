@@ -12,13 +12,18 @@ import Dashboard     from '@/pages/dashboard/Dashboard'
 import Wallet        from '@/pages/wallet/Wallet'
 import Market        from '@/pages/market/Market'
 import Transactions  from '@/pages/transactions/Transactions'
-import { History, Learn, Challenges, Progress, Settings, Help } from '@/pages/pages/Pages'
+import History       from '@/pages/history/History'
+import Learn         from '@/pages/learn/Learn'
+import Challenges    from '@/pages/challenges/Challenges'
+import Progress      from '@/pages/progress/Progress'
+import Settings      from '@/pages/settings/Settings'
+import Help          from '@/pages/help/Help'
 
 function Guard({ children }: { children: React.ReactNode }) {
   const { profile, loading } = useAuth()
   if (loading) return (
-    <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ width: 40, height: 40, border: '3px solid rgba(99,102,241,.2)', borderTopColor: '#6366f1', borderRadius: '50%' }} className="spin" />
+    <div className="page-loader" role="status" aria-label="Chargement">
+      <div className="page-loader-spinner spin" />
     </div>
   )
   if (!profile) return <Navigate to="/login" replace />
@@ -58,10 +63,10 @@ export default function App() {
       <AppRoutes />
       <Toaster position="top-right" toastOptions={{
         style: {
-          background: 'rgba(14,14,28,.95)',
+          background: 'var(--bg2)',
           backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255,255,255,.08)',
-          color: '#f0f0ff',
+          border: '1px solid var(--border)',
+          color: 'var(--tx)',
           borderRadius: 12,
           fontSize: 14,
         },

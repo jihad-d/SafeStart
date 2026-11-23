@@ -1,0 +1,77 @@
+import React, { useState } from 'react'
+import { ChevronDown, ChevronUp, Search, MessageSquare } from 'lucide-react'
+import toast from 'react-hot-toast'
+import '@/styles/pages.css'
+
+const FAQ_ITEMS = [
+  { q: "Qu'est-ce que SafeStart ?", a: "SafeStart est une application d'apprentissage de la crypto. Tu simules de vraies transactions avec les prix réels du marché, mais sans jamais utiliser d'argent réel. Un agent IA t'accompagne et explique chaque étape en français simple." },
+  { q: "Mon argent est-il en danger ?", a: "Non, absolument pas ! SafeStart est un simulateur à 100%. Tu démarres avec 1 000 € fictifs. Il est impossible de perdre de l'argent réel sur SafeStart." },
+  { q: "Comment fonctionnent les prix affichés ?", a: "Les prix sont des données réelles récupérées depuis l'API CoinGecko et mis à jour toutes les minutes. Tu pratiques avec les vrais prix du marché, dans un environnement sécurisé." },
+  { q: "Qu'est-ce que le score de sécurité ?", a: "Le score (vert/orange/rouge) évalue le risque d'une transaction avant que tu la confirmes. Il prend en compte le montant vs ton solde, la volatilité de la crypto, le slippage pour les swaps, et la validité de l'adresse pour les envois." },
+  { q: "Qu'est-ce qu'un gas fee ?", a: "Les gas fees sont des frais payés au réseau blockchain pour valider ta transaction. Sur SafeStart, ces frais sont simulés pour t'habituer à les prendre en compte." },
+  { q: "Comment puis-je améliorer mon niveau ?", a: "Ton niveau évolue automatiquement avec tes transactions simulées, les challenges complétés et les modules terminés. Plus tu pratiques, plus SafeBot adapte son niveau de langage." },
+  { q: "Comment réinitialiser mon portfolio ?", a: "Dans Paramètres, section Zone de danger, tu peux réinitialiser ton portfolio fictif. Ton solde repart à 1 000 € simulés, ta progression est conservée." },
+]
+
+export default function Help() {
+  const [search, setSearch] = useState('')
+  const [open, setOpen] = useState<number | null>(null)
+  const [feedback, setFeedback] = useState(false)
+  const [msg, setMsg] = useState('')
+
+  const filtered = FAQ_ITEMS.filter(f =>
+    !search || f.q.toLowerCase().includes(search.toLowerCase()) || f.a.toLowerCase().includes(search.toLowerCase())
+  )
+
+  return (
+    <div className="fade-up flex-container help-container">
+      <div>
+        <h1 className="text-title">Aide & FAQ</h1>
+        <p className="text-subtitle">Trouve rapidement une réponse à ta question</p>
+      </div>
+
+      <div className="search-wrapper">
+        <Search size={15} className="search-icon" />
+        <input className="glass-input search-input-padding" placeholder="Recherche (gas fees, score, wallet...)" value={search} onChange={e => setSearch(e.target.value)} />
+      </div>
+
+      <div className="dashboard-card faq-card-padding">
+        {filtered.length === 0 ? (
+          <div className="faq-no-results">Aucun résultat pour "{search}"</div>
+        ) : filtered.map((f, i) => (
+          <div key={i} className={i < filtered.length - 1 ? 'faq-row' : 'faq-row no-border'}>
+            <button onClick={() => setOpen(open === i ? null : i)} className="faq-trigger">
+              <span className="faq-question">{f.q}</span>
+              {open === i ? <ChevronUp size={16} color="var(--tx3)" /> : <ChevronDown size={16} color="var(--tx3)" />}
+            </button>
+            {open === i && (
+              <div className="faq-answer fade-up">{f.a}</div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="dashboard-card">
+        <div className="support-title"><MessageSquare size={17} />Tu n'as pas trouvé ta réponse ?</div>
+        <p className="support-desc">Contacte-nous directement — nous répondons sous 48h.</p>
+        {!feedback ? (
+          <button className="btn-pri support-btn-toggle" onClick={() => setFeedback(true)}><MessageSquare size={15} />Contacter le support</button>
+        ) : (
+          <div className="support-form">
+            <select className="glass-input support-select">
+              <option>Question générale</option>
+              <option>Signaler un bug</option>
+              <option>Suggestion</option>
+              <option>Autre</option>
+            </select>
+            <textarea className="glass-input support-textarea" rows={4} placeholder="Décris ton problème..." value={msg} onChange={e => setMsg(e.target.value)} />
+            <div className="support-form-actions">
+              <button className="btn-glass support-btn-action" onClick={() => setFeedback(false)}>Annuler</button>
+              <button className="btn-pri support-btn-action" onClick={() => { toast.success('Message envoyé ! Réponse sous 48h.'); setFeedback(false) }}>Envoyer</button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

@@ -53,3 +53,19 @@ body::before {
   gap: 6px;
   vertical-align: middle;
 }
+
+/* Chargement plein écran (vérification de session) */
+.page-loader {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-loader-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border);
+  border-top-color: var(--pri);
+  border-radius: 50%;
+}

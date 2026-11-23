@@ -22,7 +22,7 @@ export default function Market() {
   }
 
   useEffect(() => {
-    fetch().then(() => console.log('Prix chargés:', coins[0]?.current_price))
+    fetch()
   }, [])
 
   const filtered = coins.filter(c =>

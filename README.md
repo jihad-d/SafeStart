@@ -76,22 +76,28 @@ safestart-vite/
 │   │
 │   ├── lib/
 │   │   ├── hooks/
-│   │   │   └── useAuth.tsx          # Contexte auth + profil Supabase
+│   │   │   ├── useAuth.tsx          # Contexte auth + profil Supabase
+│   │   │   └── useTheme.tsx         # Thème dark/light persistant
 │   │   ├── supabase.ts              # Client Supabase
 │   │   └── utils.ts                 # fmtEur, calcSecurityScore, simulateFees…
 │   │
-│   ├── pages/
-│   │   ├── Dashboard.tsx            # Vue principale (stats, portfolio, txs récentes)
-│   │   ├── Wallet.tsx               # Portefeuille et actifs
-│   │   ├── Market.tsx               # Cours du marché
-│   │   ├── Transactions.tsx         # Formulaire buy / send / swap
-│   │   ├── Login.tsx                # Connexion
-│   │   ├── Register.tsx             # Inscription
-│   │   ├── Onboarding.tsx           # Sélection du niveau à l'inscription
-│   │   └── Pages.tsx                # History, Learn, Challenges, Progress, Settings, Help
+│   ├── pages/                  # Un dossier par page : Page.tsx + Page.css
+│   │   ├── dashboard/               # Vue principale (stats, portfolio, txs récentes)
+│   │   ├── wallet/                  # Portefeuille et actifs
+│   │   ├── market/                  # Cours du marché
+│   │   ├── transactions/            # Formulaire buy / send / swap
+│   │   ├── history/                 # Historique des transactions
+│   │   ├── learn/                   # Modules d'apprentissage
+│   │   ├── challenges/              # Challenges
+│   │   ├── progress/                # Niveau, compétences, badges
+│   │   ├── settings/                # Profil, thème, notifications
+│   │   ├── help/                    # FAQ et support
+│   │   ├── login/ · register/       # Authentification
+│   │   └── onboarding/              # Évaluation de niveau
 │   │
 │   ├── styles/                 # ← Modules CSS (voir section Design System)
 │   │   ├── variables.css            # Design tokens (couleurs, ombres, glass)
+│   │   ├── pages.css                # Styles partagés des pages secondaires
 │   │   ├── base.css                 # Reset, body, mesh background, scrollbar
 │   │   ├── typography.css           # Headings, labels, grad-text
 │   │   ├── cards.css                # glass-card, glass-card-rich, stat-card, grad-card
@@ -195,6 +201,7 @@ Exécute ensuite [`supabase/migrations/20261123_simulated_transactions.sql`](sup
 npm run dev       # Serveur de développement (HMR)
 npm run build     # Build de production dans dist/
 npm run preview   # Prévisualisation du build
+npm run typecheck # Vérification des types TypeScript
 ```
 
 ---
