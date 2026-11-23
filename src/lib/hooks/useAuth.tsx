@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { DEFAULT_BALANCE_EUR } from '@/lib/utils'
 import type { UserProfile } from '@/types'
+import toast from 'react-hot-toast'
 
 interface AuthCtx {
   profile: UserProfile | null
@@ -40,44 +42,70 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     username: null,
     level: 'absolute_beginner',
     onboarding_completed: false,
-    simulated_balance_eur: 1000,
+    simulated_balance_eur: DEFAULT_BALANCE_EUR,
     total_points: 0,
     is_premium: false,
     ai_messages_today: 0,
     ai_messages_limit: 20,
   })
 
-  // Fetch profil 
-  const fetchProfile = async (id: string): Promise<UserProfile | null> => {
+  // Fetch profil : distingue « profil absent » (data null) et « échec réseau » (failed)
+  const fetchProfile = async (id: string): Promise<{ data: UserProfile | null; failed: boolean }> => {
+    if (!supabase) return { data: null, failed: true }
+
+    try {
+      const { data, error } = await withTimeout(
+        Promise.resolve(supabase.from('profiles').select('*').eq('id', id).maybeSingle()),
+        8000,
+        'Le chargement du profil a expiré.',
+      )
+      if (error) {
+        console.error('fetchProfile error:', error)
+        return { data: null, failed: true }
+      }
+      if (!data) return { data: null, failed: false }
+
+      const nextProfile = data as UserProfile
+      setProfile(nextProfile)
+      return { data: nextProfile, failed: false }
+    } catch (error) {
+      console.error('fetchProfile error:', error)
+      return { data: null, failed: true }
+    }
+  }
+
+  // Fetch profil avec retry (le profil d'un nouveau compte peut arriver avec un léger délai)
+  const fetchProfileWithRetry = async (id: string, retries = 5, delayMs = 800) => {
+    let last = { data: null as UserProfile | null, failed: false }
+    for (let i = 0; i < retries; i++) {
+      last = await fetchProfile(id)
+      if (last.data) return last
+      if (i < retries - 1) await new Promise(resolve => setTimeout(resolve, delayMs))
+    }
+    return last
+  }
+
+  // Charge le profil, ou le crée s'il n'existe vraiment pas.
+  // Ne remplace JAMAIS un profil existant : en cas d'erreur réseau, on renvoie null.
+  const loadOrCreateProfile = async (id: string, email: string): Promise<UserProfile | null> => {
     if (!supabase) return null
 
-    const { data, error } = await withTimeout(
-      Promise.resolve(supabase.from('profiles').select('*').eq('id', id).maybeSingle() as any),
-      8000,
-      'Le chargement du profil a expire.',
-    )
+    const existing = await fetchProfileWithRetry(id)
+    if (existing.data) return existing.data
+    if (existing.failed) return null
 
+    const { error } = await supabase
+      .from('profiles')
+      .upsert(buildDefaultProfile(id, email), { onConflict: 'id', ignoreDuplicates: true })
     if (error) {
-      console.error('fetchProfile error:', error)
+      console.error('createProfile error:', error)
       return null
     }
 
-    if (!data) return null
-
-    const nextProfile = data as UserProfile
-    setProfile(nextProfile)
-    return nextProfile
+    return (await fetchProfile(id)).data
   }
 
-  // Fetch profil avec retry
-  const fetchProfileWithRetry = async (id: string, retries = 8, delayMs = 800): Promise<UserProfile | null> => {
-    for (let i = 0; i < retries; i++) {
-      const result = await fetchProfile(id)
-      if (result) return result
-      if (i < retries - 1) await new Promise(resolve => setTimeout(resolve, delayMs))
-    }
-    return null
-  }
+  const PROFILE_ERROR = 'Impossible de charger ton profil. Vérifie ta connexion et réessaie.'
 
   // Init session
   useEffect(() => {
@@ -92,12 +120,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const { data: { session } } = await client.auth.getSession()
         if (session?.user) {
-          const loadedProfile = await fetchProfileWithRetry(session.user.id)
-          if (!loadedProfile) {
-            const fallback = buildDefaultProfile(session.user.id, session.user.email ?? '')
-            await client.from('profiles').upsert(fallback)
-            setProfile(fallback)
-          }
+          const loaded = await loadOrCreateProfile(session.user.id, session.user.email ?? '')
+          if (!loaded) toast.error(PROFILE_ERROR)
         }
       } catch (error) {
         console.error('auth init error:', error)
@@ -118,17 +142,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return
       }
 
-      if (
-        event === 'SIGNED_IN' ||
-        event === 'TOKEN_REFRESHED' ||
-        (event as string) === 'USER_UPDATED'
-      ) {
-        const loadedProfile = await fetchProfileWithRetry(session.user.id)
-        if (loadedProfile) return
-
-        const fallback = buildDefaultProfile(session.user.id, session.user.email ?? '')
-        const { error: upsertError } = await client.from('profiles').upsert(fallback)
-        if (!upsertError) setProfile(fallback)
+      if (event === 'SIGNED_IN' || (event as string) === 'USER_UPDATED') {
+        await loadOrCreateProfile(session.user.id, session.user.email ?? '')
       }
     })
 
@@ -145,19 +160,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { data, error } = await withTimeout(
         supabase.auth.signInWithPassword({ email, password }),
         8000,
-        'La connexion a expire. Reessaie dans un instant.',
+        'La connexion a expiré. Réessaie dans un instant.',
       )
       if (error) return { error: error.message }
-      if (!data.user) return { error: 'Utilisateur introuvable apres connexion.' }
+      if (!data.user) return { error: 'Utilisateur introuvable après connexion.' }
 
-      const loadedProfile = await fetchProfileWithRetry(data.user.id)
-      if (loadedProfile) return { error: null }
-
-      const fallbackProfile = buildDefaultProfile(data.user.id, data.user.email ?? email)
-      const { error: upsertError } = await supabase.from('profiles').upsert(fallbackProfile)
-      if (upsertError) return { error: 'Erreur creation profil: ' + upsertError.message }
-
-      setProfile(fallbackProfile)
+      const loaded = await loadOrCreateProfile(data.user.id, data.user.email ?? email)
+      if (!loaded) {
+        await supabase.auth.signOut()
+        return { error: PROFILE_ERROR }
+      }
       return { error: null }
     } catch (error) {
       return { error: error instanceof Error ? error.message : 'Erreur de connexion inconnue.' }
@@ -167,7 +179,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Sign Up 
   const signUp = async (email: string, password: string) => {
     if (!supabase) {
-      return { error: 'Supabase n est pas configure. Ajoute .env.local pour activer l inscription.' }
+      return { error: 'Supabase n\'est pas configuré. Ajoute .env.local pour activer l\'inscription.' }
     }
 
     try {
@@ -180,14 +192,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { error: null, needsEmailConfirmation: true }
       }
 
-      const loadedProfile = await fetchProfileWithRetry(data.user.id)
-
-      if (!loadedProfile) {
-        const fallbackProfile = buildDefaultProfile(data.user.id, email)
-        const { error: upsertError } = await supabase.from('profiles').upsert(fallbackProfile)
-        if (upsertError) return { error: upsertError.message }
-        setProfile(fallbackProfile)
-      }
+      const loaded = await loadOrCreateProfile(data.user.id, email)
+      if (!loaded) return { error: PROFILE_ERROR }
 
       return { error: null, needsEmailConfirmation: false }
     } catch (error) {

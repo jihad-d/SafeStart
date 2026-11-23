@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { ArrowRight, Zap, TrendingUp, TrendingDown } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
-import { fmtEur } from '@/lib/utils'
+import { fmtEur, DEFAULT_BALANCE_EUR } from '@/lib/utils'
 import LevelIcon from '@/components/ui/LevelIcon'
 import AIPanel from '@/components/ai/AIPanel.tsx'
 import type { PortfolioAsset } from '@/types'
@@ -69,7 +69,7 @@ export default function Dashboard() {
 
   const totalPortfolio = assets.reduce((s,a) => s + a.qty * a.price, 0)
   const totalPnl       = assets.reduce((s,a) => s + (a.qty*a.price - a.qty*a.avg), 0)
-  const balance        = profile?.simulated_balance_eur ?? 750
+  const balance        = profile?.simulated_balance_eur ?? DEFAULT_BALANCE_EUR
 
   return (
     <div className="fade-up dashboard">

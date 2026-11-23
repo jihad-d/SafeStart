@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { ShoppingCart, Send, ArrowLeftRight, CheckCircle, AlertTriangle, XCircle, Lightbulb, ArrowRight, ArrowLeft } from 'lucide-react'
-import { MOCK_PRICES, fmtEur, fmtCrypto, calcSecurityScore, simulateFees, simulateGas, simulateSlippage, validateAddress } from '@/lib/utils'
+import { MOCK_PRICES, fmtEur, fmtCrypto, calcSecurityScore, simulateFees, simulateGas, simulateSlippage, validateAddress, DEFAULT_BALANCE_EUR } from '@/lib/utils'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 import SecurityScoreBadge from '@/components/transactions/SecurityScoreBadge'
@@ -42,7 +42,7 @@ export default function Transactions() {
   const score = (amount && coin) ? calcSecurityScore(
     tab, 
     parseFloat(amount),
-    profile?.simulated_balance_eur ?? 750,
+    profile?.simulated_balance_eur ?? DEFAULT_BALANCE_EUR,
     PORTFOLIO_VALUE,
     Math.abs(coin.price_change_percentage_24h),
     tab === 'swap' ? slippage : 0,
@@ -51,7 +51,7 @@ export default function Transactions() {
 
   const proceed = () => {
     if (!amount || parseFloat(amount) <= 0) { toast.error('Saisis un montant valide.'); return }
-    if (parseFloat(amount) + (tab === 'buy' ? fees : 0) > (profile?.simulated_balance_eur ?? 750)) { toast.error('Solde insuffisant (frais inclus).'); return }
+    if (parseFloat(amount) + (tab === 'buy' ? fees : 0) > (profile?.simulated_balance_eur ?? DEFAULT_BALANCE_EUR)) { toast.error('Solde insuffisant (frais inclus).'); return }
     if (tab === 'send' && !validateAddress(address)) { toast.error('Adresse wallet invalide.'); return }
     setStep('summary')
   }
@@ -102,7 +102,7 @@ export default function Transactions() {
         // Mode démo : rien n'est enregistré, mise à jour locale uniquement
         patchProfile({
           total_points: (profile?.total_points ?? 0) + 10,
-          simulated_balance_eur: (profile?.simulated_balance_eur ?? 750) - cost,
+          simulated_balance_eur: (profile?.simulated_balance_eur ?? DEFAULT_BALANCE_EUR) - cost,
         })
       }
 

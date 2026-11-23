@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { User, Save, SunMoon, Moon, Sun, Bell, AlertTriangle } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { supabase } from '@/lib/supabase'
 import { useTheme } from '@/lib/hooks/useTheme'
 import toast from 'react-hot-toast'
 import '@/styles/pages.css'
@@ -13,12 +14,28 @@ const LEVEL_LABEL: Record<string, string> = {
 }
 
 export default function Settings() {
-  const { profile, updateProfile, signOut } = useAuth()
+  const { profile, updateProfile, patchProfile, signOut } = useAuth()
   const [username, setUsername] = useState(profile?.username ?? '')
   const [notifReminders, setNotifReminders] = useState(true)
   const [notifMarket, setNotifMarket] = useState(true)
   const [notifChallenges, setNotifChallenges] = useState(false)
   const { theme, setTheme } = useTheme()
+
+  const [resetting, setResetting] = useState(false)
+
+  const resetSimulation = async () => {
+    if (!window.confirm('Réinitialiser ton portfolio ? Ton solde repassera à 1 000 € et tes cryptos simulées seront supprimées. Ton historique et tes points sont conservés.')) return
+    setResetting(true)
+    const { data, error } = await supabase.rpc('reset_simulation')
+    setResetting(false)
+    if (error) {
+      console.error(error)
+      toast.error('La réinitialisation a échoué. Réessaie dans un instant.')
+      return
+    }
+    patchProfile({ simulated_balance_eur: Number(data) })
+    toast.success('Portfolio réinitialisé !')
+  }
 
   const save = async () => {
     await updateProfile({ username })
@@ -87,9 +104,9 @@ export default function Settings() {
         <div className="danger-row border-bottom">
           <div>
             <div className="danger-label">Réinitialiser le portfolio</div>
-            <div className="danger-sub">Remet le solde fictif à 1 000 €. Badges conservés.</div>
+            <div className="danger-sub">Solde remis à 1 000 € et cryptos simulées supprimées. Historique, points et badges conservés.</div>
           </div>
-          <button className="btn-glass danger-btn-reset" onClick={() => { updateProfile({ simulated_balance_eur: 1000 }); toast.success('Portfolio réinitialisé !') }}>Réinitialiser</button>
+          <button className="btn-glass danger-btn-reset" onClick={resetSimulation} disabled={resetting}>{resetting ? 'En cours…' : 'Réinitialiser'}</button>
         </div>
         <div className="danger-row">
           <div>

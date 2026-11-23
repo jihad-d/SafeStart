@@ -43,14 +43,14 @@ export default function Onboarding() {
       setCur(c => c + 1); setSelected(null); setShowExp(false)
     } else {
       setPhase('result')
-      const score = correct + (selected === q.correct ? 1 : 0)
-      const pct = score / QUESTIONS.length
+      const pct = correct / QUESTIONS.length
       const lvl = pct >= 0.8 ? 'intermediate' : pct >= 0.5 ? 'curious_novice' : 'absolute_beginner'
       await updateProfile({ level: lvl as any, onboarding_completed: true, onboarding_score: Math.round(pct * 100) })
     }
   }
 
-  const finalScore = correct + (selected === q.correct && phase === 'result' ? 1 : 0)
+  // `correct` compte déjà chaque bonne réponse au moment du clic (pick)
+  const finalScore = correct
   const pct = finalScore / QUESTIONS.length
   const levelInfo = pct >= 0.8 ? LEVELS[2] : pct >= 0.5 ? LEVELS[1] : LEVELS[0]
 

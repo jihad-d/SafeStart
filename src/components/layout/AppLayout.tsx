@@ -7,7 +7,7 @@ import {
 } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useTheme } from '@/lib/hooks/useTheme'
-import { fmtEur } from '@/lib/utils'
+import { fmtEur, DEFAULT_BALANCE_EUR } from '@/lib/utils'
 
 const NAV = [
   { to: '/dashboard',     icon: LayoutDashboard, label: 'Tableau de bord' },
@@ -151,7 +151,7 @@ export default function AppLayout() {
 
             <span style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'.08em', color:'var(--tx3)' }}>Solde simulé</span>
             <span style={{ fontSize:16, fontWeight:800, background:'linear-gradient(135deg,#a78bfa,#7c5cfc)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>
-              {fmtEur(profile?.simulated_balance_eur ?? 750)}
+              {fmtEur(profile?.simulated_balance_eur ?? DEFAULT_BALANCE_EUR)}
             </span>
             <span style={{ fontSize:10, padding:'2px 10px', borderRadius:99, background:'rgba(124,92,252,0.15)', color:'var(--pri2)', fontWeight:700, border:'1px solid rgba(124,92,252,0.2)' }}>fictif</span>
           </div>

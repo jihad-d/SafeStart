@@ -1,5 +1,8 @@
 import type { CryptoAsset, SecurityScore, TxType } from '@/types'
 
+/** Solde fictif de départ (et après réinitialisation), en euros. */
+export const DEFAULT_BALANCE_EUR = 1000
+
 // ─── Mock fallback data (toujours dispo) ──────────────────────
 export const MOCK_PRICES: CryptoAsset[] = [
   { id: 'bitcoin',     symbol: 'BTC',  name: 'Bitcoin',   image: 'https://assets.coingecko.com/coins/images/1/thumb/bitcoin.png',   current_price: 65240, price_change_percentage_24h:  2.14 },

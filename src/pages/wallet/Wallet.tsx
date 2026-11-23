@@ -2,7 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { RefreshCw, ArrowRightLeft, TrendingUp, TrendingDown, Euro, Coins, BarChart3 } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { fmtEur, fmtCrypto } from '@/lib/utils'
+import { fmtEur, fmtCrypto, DEFAULT_BALANCE_EUR } from '@/lib/utils'
 import AIPanel from '@/components/ai/AIPanel'
 import toast from 'react-hot-toast'
 import './Wallet.css'
@@ -30,7 +30,7 @@ export default function Wallet() {
       {/* Stats */}
       <div className="stats-grid">
         {[
-          { icon: Euro, label: 'Solde dispo', value: fmtEur(profile?.simulated_balance_eur ?? 750), color: '' },
+          { icon: Euro, label: 'Solde dispo', value: fmtEur(profile?.simulated_balance_eur ?? DEFAULT_BALANCE_EUR), color: '' },
           { icon: Coins, label: 'Valeur crypto', value: fmtEur(totalPortfolio), color: '' },
           { icon: BarChart3, label: 'P&L total', value: (totalPnl >= 0 ? '+' : '') + fmtEur(totalPnl), color: totalPnl >= 0 ? '#10b981' : '#ef4444' },
         ].map(s => (
