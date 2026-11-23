@@ -803,3 +803,10 @@ a.support-btn-action {
   text-align: center;
   text-decoration: none;
 }
+
+.support-sent {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--safe);
+  margin-bottom: 12px;
+}

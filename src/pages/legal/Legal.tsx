@@ -147,13 +147,14 @@ export function Confidentialite() {
         <li><strong>Compte :</strong> adresse email et mot de passe (stocké chiffré par Supabase, jamais lisible par l'éditeur).</li>
         <li><strong>Profil :</strong> pseudo (facultatif), niveau, score d'évaluation, points et badges.</li>
         <li><strong>Simulation :</strong> solde fictif, cryptos simulées et historique des transactions simulées (y compris les adresses de wallet que tu saisis).</li>
+        <li><strong>Support :</strong> les messages que tu envoies depuis la page Aide, avec ton email pour pouvoir te répondre.</li>
       </ul>
       <p>Aucune donnée bancaire n'est demandée. Aucune donnée n'est vendue ni utilisée à des fins publicitaires.</p>
 
       <h2>Finalités et base légale</h2>
       <p>
-        Ces données servent uniquement à faire fonctionner ton compte et la simulation (base légale : exécution
-        du service auquel tu t'inscris en acceptant les CGU).
+        Ces données servent uniquement à faire fonctionner ton compte et la simulation, et à répondre à tes
+        demandes de support (base légale : exécution du service auquel tu t'inscris en acceptant les CGU).
       </p>
 
       <h2>Durée de conservation</h2>
