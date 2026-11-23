@@ -3,73 +3,44 @@ import { Link } from 'react-router-dom'
 import { ArrowRight, Zap, TrendingUp, TrendingDown } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
-import { fmtEur, DEFAULT_BALANCE_EUR } from '@/lib/utils'
+import { fmtEur, fmtCrypto, DEFAULT_BALANCE_EUR } from '@/lib/utils'
+import { useMarketPrices, usePortfolio } from '@/lib/hooks/usePortfolio'
+import AssetIcon from '@/components/ui/AssetIcon'
 import LevelIcon from '@/components/ui/LevelIcon'
 import AIPanel from '@/components/ai/AIPanel.tsx'
-import type { PortfolioAsset } from '@/types'
+import type { Transaction } from '@/types'
 import './Dashboard.css'
 
 const LEVEL_LABEL: Record<string,string> = { absolute_beginner:'Débutant absolu', curious_novice:'Novice curieux', intermediate:'Intermédiaire', advanced:'Avancé' }
 
-const RECENT_TXS = [
-  { type:'buy',  name:'Bitcoin',  sym:'BTC', amount:100, score:82, label:'safe',    date:'10 avr', color:'#10b981' },
-  { type:'send', name:'Ethereum', sym:'ETH', amount:50,  score:61, label:'warning', date:'09 avr', color:'#ef4444' },
-  { type:'swap', name:'Solana',   sym:'SOL', amount:68,  score:45, label:'warning', date:'08 avr', color:'#7c5cfc' },
-]
 const txLabel = (t:string) => t==='buy'?'Achat':t==='send'?'Envoi':'Swap'
+const txColor = (t:string) => t==='buy'?'#10b981':t==='send'?'#ef4444':'#7c5cfc'
 const scoreClass = (l:string) => l==='safe'?'score-safe':l==='warning'?'score-warning':'score-danger'
-const ASSET_COLORS: Record<string, string> = { BTC:'#f59e0b', ETH:'#7c5cfc', SOL:'#10b981' }
-const ASSET_ICONS:  Record<string, string> = { BTC:'₿',       ETH:'Ξ',       SOL:'◎'       }
-
-type DashboardAsset = PortfolioAsset & {
-  name: string; sym: string; qty: number
-  avg: number;  price: number; color: string; icon: string
-}
-
-const Sparkline = ({ color, up }: { color: string; up: boolean }) => {
-  const pts = up
-    ? '0,40 16,35 32,28 48,32 64,20 80,15 96,8'
-    : '0,10 16,18 32,14 48,25 64,22 80,30 96,35'
-  return (
-    <svg viewBox="0 0 96 48" style={{ width:'100%', height:40, display:'block' }}>
-      <defs>
-        <linearGradient id={`g${color.replace('#','')}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.35" />
-          <stop offset="100%" stopColor={color} stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <polygon points={`0,48 ${pts} 96,48`} fill={`url(#g${color.replace('#','')})`} />
-      <polyline points={pts} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
 
 export default function Dashboard() {
   const { profile } = useAuth()
-  const [assets, setAssets] = useState<DashboardAsset[]>([])
+  const { prices } = useMarketPrices()
+  const { positions, totalValue, totalPnl } = usePortfolio(prices)
+  const [recentTxs, setRecentTxs] = useState<Transaction[]>([])
+  const [txCount, setTxCount] = useState(0)
 
   useEffect(() => {
-    const loadAssets = async () => {
-      if (!profile?.id || profile.id === 'demo' || !supabase) {
-        setAssets([]); return
-      }
-      const { data, error } = await supabase.from('portfolio_assets').select('*').eq('user_id', profile.id)
+    const loadTransactions = async () => {
+      if (!profile?.id || profile.id === 'demo' || !supabase) return
+      const { data, count, error } = await supabase
+        .from('transactions')
+        .select('*', { count: 'exact' })
+        .eq('user_id', profile.id)
+        .order('created_at', { ascending: false })
+        .limit(3)
       if (error) { console.error(error); return }
-      setAssets(((data ?? []) as PortfolioAsset[]).map(asset => ({
-        ...asset,
-        name: asset.crypto_name, sym: asset.crypto_symbol,
-        qty: asset.quantity,     avg: asset.avg_buy_price,
-        price: asset.current_price ?? 0,
-        color: ASSET_COLORS[asset.crypto_symbol] ?? '#6366f1',
-        icon:  ASSET_ICONS[asset.crypto_symbol]  ?? asset.crypto_symbol[0] ?? 'C',
-      })))
+      setRecentTxs((data ?? []) as Transaction[])
+      setTxCount(count ?? 0)
     }
-    loadAssets()
+    loadTransactions()
   }, [profile?.id])
 
-  const totalPortfolio = assets.reduce((s,a) => s + a.qty * a.price, 0)
-  const totalPnl       = assets.reduce((s,a) => s + (a.qty*a.price - a.qty*a.avg), 0)
-  const balance        = profile?.simulated_balance_eur ?? DEFAULT_BALANCE_EUR
+  const balance = profile?.simulated_balance_eur ?? DEFAULT_BALANCE_EUR
 
   return (
     <div className="fade-up dashboard">
@@ -96,26 +67,23 @@ export default function Dashboard() {
           <div className="stat-card-label">Solde disponible</div>
           <div className="stat-card-value">{fmtEur(balance)}</div>
           <div className="stat-card-sub">Solde fictif · SafeStart</div>
-          <div className="stat-card-sparkline"><Sparkline color="rgba(255,255,255,0.6)" up={true} /></div>
         </div>
 
         <div className="stat-card">
           <div className="label-sm" style={{ marginBottom:12 }}>Valeur portfolio</div>
-          <div className="stat-number grad-text">{fmtEur(totalPortfolio)}</div>
+          <div className="stat-number grad-text">{fmtEur(totalValue)}</div>
           <div className="stat-pnl">
             {totalPnl >= 0 ? <TrendingUp size={13} color="#10b981" /> : <TrendingDown size={13} color="#ef4444" />}
             <span className={`stat-pnl-value ${totalPnl >= 0 ? 'positive' : 'negative'}`}>
               {totalPnl >= 0 ? '+' : ''}{fmtEur(totalPnl)} P&L
             </span>
           </div>
-          <div style={{ marginTop:12 }}><Sparkline color="#10b981" up={true} /></div>
         </div>
 
         <div className="stat-card">
           <div className="label-sm" style={{ marginBottom:12 }}>Points & progression</div>
           <div className="stat-number grad-text">{profile?.total_points ?? 0}</div>
-          <div className="stat-tx-count">{RECENT_TXS.length} transactions simulées</div>
-          <div style={{ marginTop:12 }}><Sparkline color="#7c5cfc" up={true} /></div>
+          <div className="stat-tx-count">{txCount} transaction{txCount > 1 ? 's' : ''} simulée{txCount > 1 ? 's' : ''}</div>
         </div>
       </div>
 
@@ -129,28 +97,25 @@ export default function Dashboard() {
             <Link to="/wallet" className="portfolio-link">Voir tout <ArrowRight size={13} /></Link>
           </div>
           <div className="portfolio-list">
-            {assets.map(a => {
-              const val = a.qty * a.price
-              const pct = (a.price - a.avg) / a.avg * 100
-              return (
-                <div key={a.sym} className="portfolio-asset">
-                  <div className="portfolio-asset-icon" style={{ background:`${a.color}20`, color:a.color, border:`1px solid ${a.color}30` }}>
-                    {a.icon}
-                  </div>
-                  <div style={{ flex:1 }}>
-                    <div className="portfolio-asset-name">{a.name}</div>
-                    <div className="portfolio-asset-qty">{a.qty.toFixed(6)} {a.sym}</div>
-                  </div>
-                  <div className="portfolio-asset-value">
-                    <div className="portfolio-asset-eur">{fmtEur(val)}</div>
-                    <div className={`portfolio-asset-pct ${pct >= 0 ? 'positive' : 'negative'}`}>
-                      {pct >= 0 ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
-                      {Math.abs(pct).toFixed(2)}%
-                    </div>
+            {positions.length === 0 && (
+              <p className="dashboard-empty">Aucune crypto pour l'instant. <Link to="/transactions">Simule ton premier achat</Link>.</p>
+            )}
+            {positions.slice(0, 4).map(a => (
+              <div key={a.crypto_id} className="portfolio-asset">
+                <AssetIcon symbol={a.crypto_symbol} image={a.crypto_image} className="portfolio-asset-icon" />
+                <div style={{ flex:1 }}>
+                  <div className="portfolio-asset-name">{a.crypto_name}</div>
+                  <div className="portfolio-asset-qty">{fmtCrypto(a.quantity, a.crypto_symbol)}</div>
+                </div>
+                <div className="portfolio-asset-value">
+                  <div className="portfolio-asset-eur">{fmtEur(a.value)}</div>
+                  <div className={`portfolio-asset-pct ${a.pnlPct >= 0 ? 'positive' : 'negative'}`}>
+                    {a.pnlPct >= 0 ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
+                    {Math.abs(a.pnlPct).toFixed(2)}%
                   </div>
                 </div>
-              )
-            })}
+              </div>
+            ))}
           </div>
         </div>
 
@@ -164,18 +129,21 @@ export default function Dashboard() {
           <Link to="/history" className="recent-link">Voir tout <ArrowRight size={13} /></Link>
         </div>
         <div>
-          {RECENT_TXS.map((tx, i) => (
-            <div key={i} className="recent-tx" style={{ borderBottom: i < RECENT_TXS.length-1 ? '1px solid var(--border2)' : 'none' }}>
-              <div className="recent-tx-icon" style={{ background:`${tx.color}20`, color:tx.color, border:`1px solid ${tx.color}25` }}>
+          {recentTxs.length === 0 && (
+            <p className="dashboard-empty">Aucune transaction pour l'instant.</p>
+          )}
+          {recentTxs.map((tx, i) => (
+            <div key={tx.id} className="recent-tx" style={{ borderBottom: i < recentTxs.length-1 ? '1px solid var(--border2)' : 'none' }}>
+              <div className="recent-tx-icon" style={{ background:`${txColor(tx.type)}20`, color:txColor(tx.type), border:`1px solid ${txColor(tx.type)}25` }}>
                 {txLabel(tx.type)[0]}
               </div>
               <div style={{ flex:1 }}>
-                <div className="recent-tx-label">{txLabel(tx.type)} {tx.name}</div>
-                <div className="recent-tx-date">{tx.date} 2026</div>
+                <div className="recent-tx-label">{txLabel(tx.type)} {tx.crypto_name}</div>
+                <div className="recent-tx-date">{new Date(tx.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
               </div>
               <div>
-                <div className="recent-tx-amount">{fmtEur(tx.amount)}</div>
-                <span className={`${scoreClass(tx.label)} recent-tx-score`}>{tx.score}/100</span>
+                <div className="recent-tx-amount">{fmtEur(tx.amount_eur ?? 0)}</div>
+                <span className={`${scoreClass(tx.security_score_label)} recent-tx-score`}>{tx.security_score}/100</span>
               </div>
             </div>
           ))}

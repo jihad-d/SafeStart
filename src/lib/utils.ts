@@ -19,8 +19,9 @@ export const MOCK_PRICES: CryptoAsset[] = [
 let cachedPrices: CryptoAsset[] = []
 let cacheTs = 0
 
-export async function getMarketPrices(): Promise<CryptoAsset[]> {
-  if (cachedPrices.length && Date.now() - cacheTs < 60_000) return cachedPrices
+/** Prix en direct (CoinGecko), mis en cache 60 s. `force` ignore le cache. */
+export async function getMarketPrices(force = false): Promise<CryptoAsset[]> {
+  if (!force && cachedPrices.length && Date.now() - cacheTs < 60_000) return cachedPrices
   try {
     const ids = MOCK_PRICES.map(c => c.id).join(',')
     const apiKey = import.meta.env.VITE_COINGECKO_API_KEY
@@ -46,9 +47,16 @@ export async function getMarketPrices(): Promise<CryptoAsset[]> {
     return cachedPrices
   } catch (err) {
     console.error('CoinGecko fetch failed:', err)
-    return MOCK_PRICES
+    return cachedPrices.length ? cachedPrices : MOCK_PRICES
   }
 }
+
+/** Couleur d'accent associée à une crypto (icônes, badges). */
+const ASSET_COLORS: Record<string, string> = {
+  BTC: '#f59e0b', ETH: '#7c5cfc', SOL: '#10b981', BNB: '#eab308',
+  XRP: '#64748b', ADA: '#3b82f6', AVAX: '#ef4444', LINK: '#2563eb',
+}
+export const assetColor = (symbol: string) => ASSET_COLORS[symbol] ?? '#7c5cfc'
 
 // ─── Formatters ────────────────────────────────────────────────
 export const fmtEur = (n: number, d = 2) =>

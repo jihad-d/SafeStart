@@ -306,3 +306,15 @@
     text-overflow: ellipsis; /* Coupe le texte proprement s'il est trop long */
   }
 }
+
+/* États vides */
+.dashboard-empty {
+  padding: 16px 0;
+  font-size: 13px;
+  color: var(--tx2);
+}
+
+.dashboard-empty a {
+  color: var(--pri2);
+  font-weight: 600;
+}

@@ -1,29 +1,16 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { RefreshCw, Search, ShoppingCart, TrendingUp, TrendingDown } from 'lucide-react'
-import { getMarketPrices, MOCK_PRICES, fmtEur, fmtPct } from '@/lib/utils'
-import type { CryptoAsset } from '@/types'
-import toast from 'react-hot-toast'
+import { fmtEur, fmtPct } from '@/lib/utils'
+import { useMarketPrices } from '@/lib/hooks/usePortfolio'
 import './Market.css'
 
 export default function Market() {
   const navigate = useNavigate()
-  const [coins, setCoins] = useState<CryptoAsset[]>(MOCK_PRICES)
-  const [loading, setLoading] = useState(false)
+  const { prices: coins, loading, updatedAt, refresh } = useMarketPrices()
   const [search, setSearch] = useState('')
-  const [lastUpdate, setLastUpdate] = useState(new Date())
-
-  const fetch = async () => {
-    setLoading(true)
-    const data = await getMarketPrices()
-    setCoins(data)
-    setLastUpdate(new Date())
-    setLoading(false)
-  }
-
-  useEffect(() => {
-    fetch()
-  }, [])
+  const lastUpdate = updatedAt ?? new Date()
+  const fetch = () => refresh(true)
 
   const filtered = coins.filter(c =>
     c.name.toLowerCase().includes(search.toLowerCase()) ||

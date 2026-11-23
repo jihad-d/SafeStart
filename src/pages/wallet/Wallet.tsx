@@ -4,26 +4,27 @@ import { RefreshCw, ArrowRightLeft, TrendingUp, TrendingDown, Euro, Coins, BarCh
 import { useAuth } from '@/lib/hooks/useAuth'
 import { fmtEur, fmtCrypto, DEFAULT_BALANCE_EUR } from '@/lib/utils'
 import AIPanel from '@/components/ai/AIPanel'
+import AssetIcon from '@/components/ui/AssetIcon'
+import { useMarketPrices, usePortfolio } from '@/lib/hooks/usePortfolio'
 import toast from 'react-hot-toast'
 import './Wallet.css'
 
-const ASSETS = [
-  { name: 'Bitcoin',   sym: 'BTC', qty: 0.003821, avg: 58000, price: 65240, color: '#f59e0b', icon: '₿' },
-  { name: 'Ethereum',  sym: 'ETH', qty: 0.042,    avg: 3100,   price: 3185,  color: '#6366f1', icon: 'Ξ' },
-  { name: 'Solana',    sym: 'SOL', qty: 0.52,     avg: 130,    price: 142.5, color: '#10b981', icon: '◎' },
-]
-
 export default function Wallet() {
   const { profile } = useAuth()
-  const totalPortfolio = ASSETS.reduce((s, a) => s + a.qty * a.price, 0)
-  const totalPnl = ASSETS.reduce((s, a) => s + (a.qty * a.price - a.qty * a.avg), 0)
+  const { prices, loading: pricesLoading, refresh } = useMarketPrices()
+  const { positions, totalValue, totalPnl, loading } = usePortfolio(prices)
+
+  const refreshPrices = async () => {
+    await refresh(true)
+    toast.success('Prix actualisés !')
+  }
 
   return (
     <div className="fade-up wallet-container">
       <div className="wallet-header">
         <h1 className="wallet-title">Mon Wallet</h1>
-        <button className="btn-glass wallet-btn-content" onClick={() => toast.success('Prix actualisés !')}>
-          <RefreshCw size={15} />Actualiser
+        <button className="btn-glass wallet-btn-content" onClick={refreshPrices} disabled={pricesLoading}>
+          <RefreshCw size={15} className={pricesLoading ? 'spin' : ''} />Actualiser les prix
         </button>
       </div>
 
@@ -31,7 +32,7 @@ export default function Wallet() {
       <div className="stats-grid">
         {[
           { icon: Euro, label: 'Solde dispo', value: fmtEur(profile?.simulated_balance_eur ?? DEFAULT_BALANCE_EUR), color: '' },
-          { icon: Coins, label: 'Valeur crypto', value: fmtEur(totalPortfolio), color: '' },
+          { icon: Coins, label: 'Valeur crypto', value: fmtEur(totalValue), color: '' },
           { icon: BarChart3, label: 'P&L total', value: (totalPnl >= 0 ? '+' : '') + fmtEur(totalPnl), color: totalPnl >= 0 ? '#10b981' : '#ef4444' },
         ].map(s => (
           <div key={s.label} className="wallet-card">
@@ -50,41 +51,36 @@ export default function Wallet() {
         {/* Assets */}
         <div className="wallet-card">
           <div className="assets-header">
-            <span className="assets-title">Actifs ({ASSETS.length})</span>
+            <span className="assets-title">Actifs ({positions.length})</span>
             <Link to="/transactions" className="btn-glass assets-link-btn">
               <ArrowRightLeft size={13} />Nouvelle transaction
             </Link>
           </div>
           <div className="assets-list">
-            {ASSETS.map(a => {
-              const val = a.qty * a.price
-              const pnl = a.qty * a.price - a.qty * a.avg
-              const pnlPct = (pnl / (a.qty * a.avg)) * 100
-              const isPnlPositive = pnlPct >= 0
-
+            {loading && <p className="wallet-empty">Chargement de ton portfolio…</p>}
+            {!loading && positions.length === 0 && (
+              <div className="wallet-empty">
+                <p>Tu ne détiens encore aucune crypto simulée.</p>
+                <Link to="/transactions" className="btn-pri">Simuler un premier achat</Link>
+              </div>
+            )}
+            {positions.map(a => {
+              const isPnlPositive = a.pnl >= 0
               return (
-                <div key={a.sym} className="asset-item">
-                  <div 
-                    className="asset-icon-wrapper" 
-                    style={{ background: `${a.color}22`, color: a.color }}
-                  >
-                    {a.icon}
-                  </div>
+                <div key={a.crypto_id} className="asset-item">
+                  <AssetIcon symbol={a.crypto_symbol} image={a.crypto_image} className="asset-icon-wrapper" />
                   <div className="asset-info">
                     <div className="asset-name">
-                      {a.name} <span className="asset-symbol">{a.sym}</span>
+                      {a.crypto_name} <span className="asset-symbol">{a.crypto_symbol}</span>
                     </div>
-                    <div className="asset-qty">{fmtCrypto(a.qty, a.sym)}</div>
+                    <div className="asset-qty">{fmtCrypto(a.quantity, a.crypto_symbol)} · achat moyen {fmtEur(a.avg_buy_price)}</div>
                   </div>
                   <div className="asset-values">
-                    <div className="asset-fiat-val">{fmtEur(val)}</div>
+                    <div className="asset-fiat-val">{fmtEur(a.value)}</div>
                     <div className="asset-pnl-wrapper">
                       {isPnlPositive ? <TrendingUp size={12} color="#10b981" /> : <TrendingDown size={12} color="#ef4444" />}
-                      <span 
-                        className="asset-pnl-percentage" 
-                        style={{ color: isPnlPositive ? '#10b981' : '#ef4444' }}
-                      >
-                        {isPnlPositive ? '+' : ''}{pnlPct.toFixed(2)}%
+                      <span className="asset-pnl-percentage" style={{ color: isPnlPositive ? '#10b981' : '#ef4444' }}>
+                        {isPnlPositive ? '+' : ''}{a.pnlPct.toFixed(2)}% ({isPnlPositive ? '+' : ''}{fmtEur(a.pnl)})
                       </span>
                     </div>
                   </div>

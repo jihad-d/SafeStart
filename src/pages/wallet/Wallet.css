@@ -236,3 +236,14 @@
     font-size: 11px;
   }
 }
+/* État vide du portfolio */
+.wallet-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 0;
+  text-align: center;
+  color: var(--tx2);
+  font-size: 14px;
+}

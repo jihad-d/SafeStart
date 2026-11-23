@@ -1,11 +1,12 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { ShoppingCart, Send, ArrowLeftRight, CheckCircle, AlertTriangle, XCircle, Lightbulb, ArrowRight, ArrowLeft } from 'lucide-react'
-import { MOCK_PRICES, fmtEur, fmtCrypto, calcSecurityScore, simulateFees, simulateGas, simulateSlippage, validateAddress, DEFAULT_BALANCE_EUR } from '@/lib/utils'
+import { fmtEur, fmtCrypto, calcSecurityScore, simulateFees, simulateGas, simulateSlippage, validateAddress, DEFAULT_BALANCE_EUR } from '@/lib/utils'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 import SecurityScoreBadge from '@/components/transactions/SecurityScoreBadge'
 import AIPanel from '@/components/ai/AIPanel'
+import { useMarketPrices, usePortfolio } from '@/lib/hooks/usePortfolio'
 import type { TxType } from '@/types'
 import toast from 'react-hot-toast'
 import './Transactions.css' 
@@ -16,7 +17,6 @@ const TABS: { type: TxType; label: string; icon: React.ElementType }[] = [
   { type: 'swap', label: 'Swap',   icon: ArrowLeftRight },
 ]
 
-const PORTFOLIO_VALUE = 248
 type SummaryRow = [string, string]
 
 export default function Transactions() {
@@ -32,18 +32,26 @@ export default function Transactions() {
   const [step, setStep] = useState<'form'|'summary'|'done'>('form')
   const [confirming, setConfirming] = useState(false)
 
-  const coin = MOCK_PRICES.find(c => c.id === selectedId) ?? MOCK_PRICES[0]
-  const swapTo = MOCK_PRICES.find(c => c.id === swapToId) ?? MOCK_PRICES[1]
+  // Prix en direct (CoinGecko), avec repli sur des prix de secours si l'API est indisponible
+  const { prices } = useMarketPrices()
+  const { totalValue: portfolioValue } = usePortfolio(prices)
+  const coin = prices.find(c => c.id === selectedId) ?? prices[0]
+  const swapTo = prices.find(c => c.id === swapToId) ?? prices[1]
   const qty = amount && coin ? parseFloat(amount) / coin.current_price : 0
   const fees = amount ? simulateFees(parseFloat(amount)) : 0
-  const gas = simulateGas()
-  const slippage = amount ? simulateSlippage(parseFloat(amount)) : 0
+  // Valeurs aléatoires figées tant que les paramètres ne changent pas
+  // (sinon elles changeaient à chaque rendu, et le récapitulatif ≠ montant enregistré)
+  const gas = useMemo(() => simulateGas(), [tab, selectedId])
+  const slippage = useMemo(
+    () => (amount ? simulateSlippage(parseFloat(amount)) : 0),
+    [amount, selectedId, swapToId],
+  )
 
   const score = (amount && coin) ? calcSecurityScore(
     tab, 
     parseFloat(amount),
     profile?.simulated_balance_eur ?? DEFAULT_BALANCE_EUR,
-    PORTFOLIO_VALUE,
+    portfolioValue,
     Math.abs(coin.price_change_percentage_24h),
     tab === 'swap' ? slippage : 0,
     tab === 'send' ? validateAddress(address) : true,
@@ -172,7 +180,7 @@ export default function Transactions() {
                   {tab === 'swap' ? 'Crypto à échanger' : 'Cryptomonnaie'}
                 </label>
                 <select className="glass-input" value={selectedId} onChange={e => setSelectedId(e.target.value)}>
-                  {MOCK_PRICES.map(c => (
+                  {prices.map(c => (
                     <option key={c.id} value={c.id} className="tx-select-option">
                       {c.name} ({c.symbol}) — {fmtEur(c.current_price, c.current_price < 1 ? 4 : 2)}
                     </option>
@@ -185,7 +193,7 @@ export default function Transactions() {
                 <div className="tx-form-group">
                   <label className="tx-label">Crypto de destination</label>
                   <select className="glass-input" value={swapToId} onChange={e => setSwapToId(e.target.value)}>
-                    {MOCK_PRICES.filter(c => c.id !== selectedId).map(c => (
+                    {prices.filter(c => c.id !== selectedId).map(c => (
                       <option key={c.id} value={c.id} className="tx-select-option">{c.name} ({c.symbol})</option>
                     ))}
                   </select>
