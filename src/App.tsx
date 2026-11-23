@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider, useAuth } from '@/lib/hooks/useAuth'
+import { ThemeProvider } from '@/lib/hooks/useTheme'
 
 import Login         from '@/pages/login/Login'
 import Register      from '@/pages/register/Register'
@@ -51,13 +52,8 @@ function AppRoutes() {
 }
 
 export default function App() {
-  const [theme, setTheme] = useState<'dark'|'light'>('dark')
-
-  useEffect(() => {
-    document.documentElement.className = theme
-  }, [theme])
-
   return (
+    <ThemeProvider>
     <AuthProvider>
       <AppRoutes />
       <Toaster position="top-right" toastOptions={{
@@ -71,5 +67,6 @@ export default function App() {
         },
       }} />
     </AuthProvider>
+    </ThemeProvider>
   )
 }

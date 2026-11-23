@@ -545,6 +545,12 @@
   flex: 1;
 }
 
+.appearance-btn.active {
+  border-color: var(--pri);
+  color: var(--tx);
+  box-shadow: 0 0 0 1px var(--pri) inset;
+}
+
 .notification-title-block {
   font-size: 15px;
   font-weight: 700;

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Clock, ChevronDown, ChevronUp, Lock, ChevronRight, Zap, Search, MessageSquare } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { useTheme } from '@/lib/hooks/useTheme'
 import { supabase } from '@/lib/supabase'
 import { fmtEur } from '@/lib/utils'
 import type { Transaction } from '@/types'
@@ -146,9 +147,11 @@ export function History() {
                     ['Type', txLabel(tx.type)],
                     tx.amount ? ['Montant', fmtEur(tx.amount)] : null,
                     tx.qty ? ['Quantité', `${tx.qty} ${tx.sym}`] : null,
-                    (tx as any).fees ? ['Frais', fmtEur((tx as any).fees)] : null,
-                    (tx as any).gas ? ['Gas fees', fmtEur((tx as any).gas)] : null,
-                    (tx as any).slippage ? ['Slippage', `${(tx as any).slippage}%`] : null,
+                    tx.fees_eur ? ['Frais', fmtEur(tx.fees_eur)] : null,
+                    tx.gas_fee_eur ? ['Gas fees', fmtEur(tx.gas_fee_eur)] : null,
+                    tx.slippage_percentage ? ['Slippage', `${tx.slippage_percentage}%`] : null,
+                    tx.type === 'swap' && tx.to_crypto_symbol ? ['Vers', tx.to_crypto_symbol] : null,
+                    tx.to_address ? ['Adresse', `${tx.to_address.slice(0, 6)}…${tx.to_address.slice(-4)}`] : null,
                     ['Score', `${tx.score}/100`],
                   ].filter((row): row is DetailRow => row !== null).map(([k, v]) => (
                     <div key={k as string}>
@@ -403,13 +406,20 @@ export function Progress() {
 }
 
 // ─── SETTINGS 
+const LEVEL_LABEL: Record<string, string> = {
+  absolute_beginner: '🌱 Débutant absolu',
+  curious_novice: '🔍 Novice curieux',
+  intermediate: '📈 Intermédiaire',
+  advanced: '🚀 Avancé',
+}
+
 export function Settings() {
   const { profile, updateProfile, signOut } = useAuth()
   const [username, setUsername] = useState(profile?.username ?? '')
   const [notifReminders, setNotifReminders] = useState(true)
   const [notifMarket, setNotifMarket] = useState(true)
   const [notifChallenges, setNotifChallenges] = useState(false)
-  const [darkMode, setDarkMode] = useState(true)
+  const { theme, setTheme } = useTheme()
 
   const save = async () => {
     await updateProfile({ username })
@@ -440,7 +450,7 @@ export function Settings() {
         </div>
         <div className="settings-form-group">
           <label className="settings-label">Niveau actuel</label>
-          <input className="glass-input settings-input-disabled" value="🌱 Débutant absolu" disabled />
+          <input className="glass-input settings-input-disabled" value={LEVEL_LABEL[profile?.level ?? 'absolute_beginner']} disabled />
         </div>
         <button className="btn-pri settings-btn-save" onClick={save}>💾 Sauvegarder</button>
       </div>
@@ -449,8 +459,8 @@ export function Settings() {
       <div className="dashboard-card">
         <div className="settings-section-title">🌓 Apparence</div>
         <div className="appearance-grid">
-          <button className="btn-glass appearance-btn" onClick={() => { document.documentElement.className = 'dark'; setDarkMode(true) }}>🌙 Sombre</button>
-          <button className="btn-glass appearance-btn" onClick={() => { document.documentElement.className = 'light'; setDarkMode(false) }}>☀️ Clair</button>
+          <button className={`btn-glass appearance-btn ${theme === 'dark' ? 'active' : ''}`} aria-pressed={theme === 'dark'} onClick={() => setTheme('dark')}>🌙 Sombre</button>
+          <button className={`btn-glass appearance-btn ${theme === 'light' ? 'active' : ''}`} aria-pressed={theme === 'light'} onClick={() => setTheme('light')}>☀️ Clair</button>
         </div>
       </div>
 

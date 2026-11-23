@@ -6,6 +6,7 @@ import {
   Settings, LogOut, Zap, Bell, Sun, Moon, Menu, X 
 } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { useTheme } from '@/lib/hooks/useTheme'
 import { fmtEur } from '@/lib/utils'
 
 const NAV = [
@@ -31,14 +32,9 @@ const LEVEL_LABEL: Record<string, string> = {
 export default function AppLayout() {
   const { profile, signOut } = useAuth()
   const navigate = useNavigate()
-  const [dark, setDark] = useState(true)
+  const { theme, toggleTheme } = useTheme()
+  const dark = theme === 'dark'
   const [isMenuOpen, setIsMenuOpen] = useState(false) 
-
-  const toggleTheme = () => {
-    const next = dark ? 'light' : 'dark'
-    document.documentElement.className = next
-    setDark(!dark)
-  }
 
   return (
     <div style={{ display:'flex', minHeight:'100vh', position:'relative', zIndex:1 }}>
@@ -167,7 +163,7 @@ export default function AppLayout() {
               <Bell size={16} />
               <span style={{ position:'absolute', top:8, right:8, width:6, height:6, borderRadius:'50%', background:'var(--pri)', border:'1.5px solid var(--bg)' }} />
             </button>
-            <button className="btn-glass" style={{ width:38, height:38, padding:0, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:12 }} onClick={toggleTheme}>
+            <button className="btn-glass" style={{ width:38, height:38, padding:0, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:12 }} onClick={toggleTheme} aria-label={dark ? 'Passer en thème clair' : 'Passer en thème sombre'}>
               {dark ? <Sun size={16} /> : <Moon size={16} />}
             </button>
           </div>
