@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { ChevronDown, ChevronUp, Search, MessageSquare } from 'lucide-react'
-import toast from 'react-hot-toast'
+import { CONTACT_EMAIL } from '@/lib/config'
 import '@/styles/pages.css'
 
 const FAQ_ITEMS = [
@@ -18,6 +18,10 @@ export default function Help() {
   const [open, setOpen] = useState<number | null>(null)
   const [feedback, setFeedback] = useState(false)
   const [msg, setMsg] = useState('')
+  const [topic, setTopic] = useState('Question générale')
+
+  // Pas de serveur d'envoi : on ouvre la messagerie de l'utilisateur avec le message prérempli
+  const mailtoHref = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(`[SafeStart] ${topic}`)}&body=${encodeURIComponent(msg)}`
 
   const filtered = FAQ_ITEMS.filter(f =>
     !search || f.q.toLowerCase().includes(search.toLowerCase()) || f.a.toLowerCase().includes(search.toLowerCase())
@@ -40,7 +44,7 @@ export default function Help() {
           <div className="faq-no-results">Aucun résultat pour "{search}"</div>
         ) : filtered.map((f, i) => (
           <div key={i} className={i < filtered.length - 1 ? 'faq-row' : 'faq-row no-border'}>
-            <button onClick={() => setOpen(open === i ? null : i)} className="faq-trigger">
+            <button onClick={() => setOpen(open === i ? null : i)} className="faq-trigger" aria-expanded={open === i}>
               <span className="faq-question">{f.q}</span>
               {open === i ? <ChevronUp size={16} color="var(--tx3)" /> : <ChevronDown size={16} color="var(--tx3)" />}
             </button>
@@ -53,21 +57,25 @@ export default function Help() {
 
       <div className="dashboard-card">
         <div className="support-title"><MessageSquare size={17} />Tu n'as pas trouvé ta réponse ?</div>
-        <p className="support-desc">Contacte-nous directement — nous répondons sous 48h.</p>
+        <p className="support-desc">
+          Écris-nous à <a href={`mailto:${CONTACT_EMAIL}`} className="support-email">{CONTACT_EMAIL}</a>, ou utilise le formulaire : ta messagerie s'ouvrira avec ton message prérempli.
+        </p>
         {!feedback ? (
           <button className="btn-pri support-btn-toggle" onClick={() => setFeedback(true)}><MessageSquare size={15} />Contacter le support</button>
         ) : (
           <div className="support-form">
-            <select className="glass-input support-select">
+            <label htmlFor="support-topic" className="sr-only">Sujet</label>
+            <select id="support-topic" className="glass-input support-select" value={topic} onChange={e => setTopic(e.target.value)}>
               <option>Question générale</option>
               <option>Signaler un bug</option>
               <option>Suggestion</option>
               <option>Autre</option>
             </select>
-            <textarea className="glass-input support-textarea" rows={4} placeholder="Décris ton problème..." value={msg} onChange={e => setMsg(e.target.value)} />
+            <label htmlFor="support-message" className="sr-only">Message</label>
+            <textarea id="support-message" className="glass-input support-textarea" rows={4} placeholder="Décris ton problème..." value={msg} onChange={e => setMsg(e.target.value)} />
             <div className="support-form-actions">
               <button className="btn-glass support-btn-action" onClick={() => setFeedback(false)}>Annuler</button>
-              <button className="btn-pri support-btn-action" onClick={() => { toast.success('Message envoyé ! Réponse sous 48h.'); setFeedback(false) }}>Envoyer</button>
+              <a className="btn-pri support-btn-action" href={mailtoHref}>Ouvrir ma messagerie</a>
             </div>
           </div>
         )}

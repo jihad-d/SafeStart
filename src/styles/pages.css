@@ -763,3 +763,43 @@
   justify-content: flex-start;
   margin-top: 14px;
 }
+
+/* Challenges réalisés */
+.challenge-status {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--safe);
+}
+
+.challenge-done {
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.challenge-footer {
+  margin-top: 12px;
+}
+
+.challenge-btn {
+  justify-content: center;
+  text-decoration: none;
+}
+
+.learn-soon {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tx2);
+  background: var(--glass2);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: 4px 12px;
+}
+
+.support-email {
+  color: var(--pri2);
+  font-weight: 600;
+}
+
+a.support-btn-action {
+  text-align: center;
+  text-decoration: none;
+}

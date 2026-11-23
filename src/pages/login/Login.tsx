@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, AlertCircle } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
 import { LegalLinks } from '@/pages/legal/Legal'
 import './Login.css'
@@ -21,6 +22,16 @@ export default function Login() {
   }, [navigate, profile])
 
 
+  const forgotPassword = async () => {
+    setError('')
+    if (!email) { setError('Saisis ton email ci-dessus, puis clique sur « Mot de passe oublié ? ».'); return }
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    })
+    if (resetError) { setError(resetError.message); return }
+    toast.success("Si un compte existe pour cet email, un lien de réinitialisation vient d'être envoyé.")
+  }
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -29,7 +40,7 @@ export default function Login() {
     const { error: authError } = await signIn(email, pwd)
     if (authError) {
       if (authError.toLowerCase().includes('email not confirmed')) {
-        setError('Ton email n a pas encore ete confirme.')
+        setError("Ton email n'a pas encore été confirmé.")
       } else if (authError.toLowerCase().includes('invalid login credentials')) {
         setError('Identifiants incorrects.')
       } else {
@@ -77,7 +88,7 @@ export default function Login() {
               </button>
             </div>
             <div className="login-forgot-password-container">
-              <span className="login-forgot-password">Mot de passe oublié ?</span>
+              <button type="button" className="login-forgot-password" onClick={forgotPassword}>Mot de passe oublié ?</button>
             </div>
           </div>
           <button className="btn-pri login-submit-btn" type="submit" disabled={loading}>

@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/lib/hooks/useTheme'
 
 import Login         from '@/pages/login/Login'
 import Register      from '@/pages/register/Register'
+import ResetPassword from '@/pages/login/ResetPassword'
 import Onboarding    from '@/pages/onboarding/Onboarding'
 import AppLayout     from '@/components/layout/AppLayout'
 import Dashboard     from '@/pages/dashboard/Dashboard'
@@ -39,6 +40,7 @@ function AppRoutes() {
       <Route path="/login"      element={!loading && profile ? <Navigate to="/dashboard" /> : <Login />} />
       <Route path="/register"   element={!loading && profile ? <Navigate to="/dashboard" /> : <Register />} />
       <Route path="/onboarding" element={<Onboarding />} />
+      <Route path="/reset-password"   element={<ResetPassword />} />
       <Route path="/mentions-legales" element={<MentionsLegales />} />
       <Route path="/cgu"              element={<Cgu />} />
       <Route path="/confidentialite"  element={<Confidentialite />} />

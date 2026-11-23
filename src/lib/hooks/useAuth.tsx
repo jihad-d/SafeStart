@@ -142,7 +142,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return
       }
 
-      if (event === 'SIGNED_IN' || (event as string) === 'USER_UPDATED') {
+      if (event === 'SIGNED_IN' || event === 'PASSWORD_RECOVERY' || (event as string) === 'USER_UPDATED') {
         await loadOrCreateProfile(session.user.id, session.user.email ?? '')
       }
     })

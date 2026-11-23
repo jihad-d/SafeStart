@@ -3,7 +3,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Wallet, TrendingUp, ArrowLeftRight,
   Clock, BookOpen, Trophy, BarChart3, HelpCircle,
-  Settings, LogOut, Zap, Bell, Sun, Moon, Menu, X 
+  Settings, LogOut, Sun, Moon, Menu, X 
 } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useTheme } from '@/lib/hooks/useTheme'
@@ -102,23 +102,6 @@ export default function AppLayout() {
 
         {/* Bottom */}
         <div style={{ padding:'10px 10px 16px', borderTop:'1px solid rgba(124,92,252,0.1)' }}>
-          {!profile?.is_premium && (
-            <div style={{
-              background:'linear-gradient(135deg,rgba(124,92,252,0.2),rgba(79,53,210,0.12))',
-              border:'1px solid rgba(124,92,252,0.25)',
-              borderRadius:16, padding:'12px 14px', marginBottom:8,
-            }}>
-              <div style={{ display:'flex', alignItems:'center', gap:5, fontSize:11, fontWeight:700, color:'var(--pri2)', marginBottom:4 }}>
-                <Zap size={11} />Version gratuite
-              </div>
-              <p style={{ fontSize:11, color:'var(--tx3)', marginBottom:8, lineHeight:1.4 }}>
-                Débloque challenges avancés et IA illimitée
-              </p>
-              <button className="btn-pri" style={{ width:'100%', padding:'8px 0', fontSize:12, borderRadius:10 }}>
-                Essayer 7 jours gratuits
-              </button>
-            </div>
-          )}
           <NavLink to="/help"     className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} style={{ marginBottom:2 }}><HelpCircle size={15} />Aide & FAQ</NavLink>
           <NavLink to="/settings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} style={{ marginBottom:2 }}><Settings size={15} />Paramètres</NavLink>
           <button className="nav-item" style={{ width:'100%', color:'#ef4444', border:'none', background:'transparent', cursor:'pointer' }}
@@ -144,6 +127,7 @@ export default function AppLayout() {
             <button 
               className="mobile-burger-btn"
               onClick={() => setIsMenuOpen(true)}
+              aria-label="Ouvrir le menu"
               style={{ background: 'none', border: 'none', color: 'var(--tx)', cursor: 'pointer', padding: 0 }}
             >
               <Menu size={22} />
@@ -156,10 +140,6 @@ export default function AppLayout() {
             <span style={{ fontSize:10, padding:'2px 10px', borderRadius:99, background:'rgba(124,92,252,0.15)', color:'var(--pri2)', fontWeight:700, border:'1px solid rgba(124,92,252,0.2)' }}>fictif</span>
           </div>
           <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-            <button className="btn-glass" style={{ width:38, height:38, padding:0, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:12, position:'relative' }}>
-              <Bell size={16} />
-              <span style={{ position:'absolute', top:8, right:8, width:6, height:6, borderRadius:'50%', background:'var(--pri)', border:'1.5px solid var(--bg)' }} />
-            </button>
             <button className="btn-glass" style={{ width:38, height:38, padding:0, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:12 }} onClick={toggleTheme} aria-label={dark ? 'Passer en thème clair' : 'Passer en thème sombre'}>
               {dark ? <Sun size={16} /> : <Moon size={16} />}
             </button>

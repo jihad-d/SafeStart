@@ -1,68 +1,72 @@
 import React from 'react'
-import { Lock, Zap, Trophy, ShieldCheck, Coins, Globe, Repeat, Rocket, Target } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { CheckCircle, Target, ArrowRight } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
-import toast from 'react-hot-toast'
+import { useTransactions } from '@/lib/hooks/useTransactions'
+import { usePortfolio } from '@/lib/hooks/usePortfolio'
+import { evaluateChallenges, LEVEL_COLORS } from '@/lib/challenges'
 import '@/styles/pages.css'
-
-const CHALLENGES = [
-  { title: 'Premier achat',          desc: 'Simule ton premier achat de cryptomonnaie.',     obj: '1 achat simulé',           level: 'Débutant',      lvlColor: '#10b981', pts: 100, icon: Trophy, premium: false },
-  { title: 'Acheteur prudent',       desc: 'Achète du BTC avec un score de sécurité vert.',  obj: 'Score ≥ 70/100',           level: 'Débutant',      lvlColor: '#10b981', pts: 150, icon: ShieldCheck, premium: false },
-  { title: 'Maître des frais',       desc: 'Effectue un achat avec moins de 0.5% de frais.', obj: 'Frais < 0.5%',             level: 'Débutant',      lvlColor: '#10b981', pts: 120, icon: Coins, premium: false },
-  { title: 'Portefeuille diversifié',desc: 'Détenir au moins 3 cryptos différentes.',         obj: '3 cryptos dans le portfolio',level:'Intermédiaire', lvlColor: '#6366f1', pts: 200, icon: Globe, premium: false },
-  { title: 'Swap intelligent',       desc: 'Réalise un swap avec un slippage < 1%.',          obj: 'Slippage < 1%',            level: 'Intermédiaire', lvlColor: '#6366f1', pts: 250, icon: Repeat, premium: false },
-  { title: 'Explorateur DeFi',       desc: 'Réalise 5 swaps variés.',                         obj: '5 swaps différents',        level: 'Avancé',        lvlColor: '#f59e0b', pts: 400, icon: Rocket, premium: true  },
-]
 
 export default function Challenges() {
   const { profile } = useAuth()
+  const { transactions, loading } = useTransactions()
+  const { positions } = usePortfolio([])
+  const challenges = evaluateChallenges({ transactions, holdings: positions.length })
+  const completed = challenges.filter(c => c.done).length
+
   return (
     <div className="fade-up flex-container">
       <div>
         <h1 className="text-title">Challenges</h1>
-        <p className="text-subtitle">Complète des missions pour gagner des points et débloquer des badges</p>
+        <p className="text-subtitle">Des missions pour t'entraîner. Ta progression se met à jour automatiquement à chaque simulation.</p>
       </div>
       <div className="grid-three-columns">
         {[
-          ['0', 'Complétés'],
+          [`${completed}/${challenges.length}`, 'Complétés'],
+          [String(challenges.length - completed), 'À relever'],
           [String(profile?.total_points ?? 0), 'Points totaux'],
-          ['1', 'Badges']
         ].map(([v, l]) => (
           <div key={l} className="dashboard-card challenge-stat-card">
-            <div className="challenge-stat-val">{v}</div>
+            <div className="challenge-stat-val">{loading ? '…' : v}</div>
             <div className="challenge-stat-label">{l}</div>
           </div>
         ))}
       </div>
       <div className="grid-two-columns">
-        {CHALLENGES.map(c => (
-          <div 
-            key={c.title} 
-            className="dashboard-card"
-            style={{ opacity: c.premium && !profile?.is_premium ? .85 : 1 }}
-          >
-            <div className="challenge-header">
-              <div className="challenge-badge-group">
-                <span className="challenge-icon"><c.icon size={22} /></span>
-                <span 
-                  className="challenge-lvl-badge"
-                  style={{ background: `${c.lvlColor}22`, color: c.lvlColor }}
-                >
-                  {c.level}
-                </span>
+        {challenges.map(c => {
+          const color = LEVEL_COLORS[c.level]
+          return (
+            <div key={c.title} className={`dashboard-card ${c.done ? 'challenge-done' : ''}`}>
+              <div className="challenge-header">
+                <div className="challenge-badge-group">
+                  <span className="challenge-icon"><c.icon size={22} /></span>
+                  <span className="challenge-lvl-badge" style={{ background: `${color}22`, color }}>{c.level}</span>
+                </div>
+                {c.done && <span className="challenge-status ico-inline"><CheckCircle size={14} />Réalisé</span>}
               </div>
-              <span className="challenge-pts">+{c.pts} pts</span>
+              <div className="challenge-title">{c.title}</div>
+              <div className="challenge-desc">{c.desc}</div>
+              <div className="challenge-obj ico-inline"><Target size={13} />Progression : {c.current}/{c.target}</div>
+              <div
+                className="skill-bar-bg"
+                role="progressbar"
+                aria-label={`Progression du challenge ${c.title}`}
+                aria-valuemin={0}
+                aria-valuemax={c.target}
+                aria-valuenow={c.current}
+              >
+                <div className="skill-bar-fill" style={{ width: `${(c.current / c.target) * 100}%` }} />
+              </div>
+              {!c.done && (
+                <div className="challenge-footer">
+                  <Link to="/transactions" className="btn-glass challenge-btn">
+                    S'entraîner <ArrowRight size={13} />
+                  </Link>
+                </div>
+              )}
             </div>
-            <div className="challenge-title">{c.title}</div>
-            <div className="challenge-desc">{c.desc}</div>
-            <div className="challenge-obj ico-inline"><Target size={13} />{c.obj}</div>
-            <div className="challenge-footer">
-              {c.premium && !profile?.is_premium
-                ? <button className="btn-glass challenge-btn"><Lock size={12} />Déverrouiller (Premium)</button>
-                : <button className="btn-pri challenge-btn challenge-btn-start" onClick={() => toast.success('Challenge démarré !')}><Zap size={13} />Commencer</button>
-              }
-            </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { User, Save, SunMoon, Moon, Sun, Bell, AlertTriangle, Download, Shield } from 'lucide-react'
+import { User, Save, SunMoon, Moon, Sun, AlertTriangle, Download, Shield } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { LegalLinks } from '@/pages/legal/Legal'
 import { useAuth } from '@/lib/hooks/useAuth'
@@ -18,9 +18,6 @@ const LEVEL_LABEL: Record<string, string> = {
 export default function Settings() {
   const { profile, updateProfile, patchProfile, signOut } = useAuth()
   const [username, setUsername] = useState(profile?.username ?? '')
-  const [notifReminders, setNotifReminders] = useState(true)
-  const [notifMarket, setNotifMarket] = useState(true)
-  const [notifChallenges, setNotifChallenges] = useState(false)
   const { theme, setTheme } = useTheme()
 
   const navigate = useNavigate()
@@ -98,13 +95,6 @@ export default function Settings() {
     toast.success('Profil mis à jour !')
   }
 
-  const Toggle = ({ value, onChange }: { value: boolean; onChange: () => void }) => (
-    <label className="toggle-wrap">
-      <input type="checkbox" checked={value} onChange={onChange} />
-      <span className="toggle-slider" />
-    </label>
-  )
-
   return (
     <div className="fade-up flex-container settings-container">
       <h1 className="text-title">Paramètres</h1>
@@ -134,24 +124,6 @@ export default function Settings() {
           <button className={`btn-glass appearance-btn ${theme === 'dark' ? 'active' : ''}`} aria-pressed={theme === 'dark'} onClick={() => setTheme('dark')}><span className="ico-inline"><Moon size={15} />Sombre</span></button>
           <button className={`btn-glass appearance-btn ${theme === 'light' ? 'active' : ''}`} aria-pressed={theme === 'light'} onClick={() => setTheme('light')}><span className="ico-inline"><Sun size={15} />Clair</span></button>
         </div>
-      </div>
-
-      {/* Notifications */}
-      <div className="dashboard-card">
-        <div className="notification-title-block ico-inline"><Bell size={16} />Notifications</div>
-        {[
-          { label: "Rappels d'activité", sub: 'Relances si inactif depuis 3 jours', val: notifReminders, set: () => setNotifReminders(!notifReminders) },
-          { label: 'Alertes marché (±10%)', sub: 'Variation importante dans ton portfolio', val: notifMarket, set: () => setNotifMarket(!notifMarket) },
-          { label: 'Nouveaux challenges', sub: 'Challenges disponibles et badges', val: notifChallenges, set: () => setNotifChallenges(!notifChallenges) },
-        ].map(n => (
-          <label key={n.label} className="notification-row">
-            <div>
-              <div className="notification-label">{n.label}</div>
-              <div className="notification-sub">{n.sub}</div>
-            </div>
-            <Toggle value={n.val} onChange={n.set} />
-          </label>
-        ))}
       </div>
 
       {/* Données personnelles */}
