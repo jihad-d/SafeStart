@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { X, Info } from 'lucide-react'
+import { X, Info, CheckCircle, XCircle, AlertTriangle } from 'lucide-react'
 import type { SecurityScore } from '@/types'
 
 const LABELS = { safe: 'Faible risque', warning: 'Risque modéré', danger: 'Risque élevé' }
@@ -45,7 +45,9 @@ export default function SecurityScoreBadge({ score }: { score: SecurityScore }) 
               {score.details.map((d, i) => (
                 <div key={i} style={{ background: 'var(--glass2)', border: '1px solid var(--border)', borderRadius: 12, padding: 12 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                    <span style={{ fontSize: 12 }}>{d.impact === 'positive' ? '✅' : d.impact === 'negative' ? '❌' : '⚠️'}</span>
+                    <span style={{ display: 'inline-flex', color: d.impact === 'positive' ? 'var(--safe)' : d.impact === 'negative' ? 'var(--danger)' : 'var(--warn)' }}>
+                      {d.impact === 'positive' ? <CheckCircle size={13} /> : d.impact === 'negative' ? <XCircle size={13} /> : <AlertTriangle size={13} />}
+                    </span>
                     <span style={{ fontSize: 12, fontWeight: 700, color: d.impact === 'positive' ? 'var(--safe)' : d.impact === 'negative' ? 'var(--danger)' : 'var(--warn)' }}>{d.label}</span>
                   </div>
                   <p style={{ fontSize: 12, color: 'var(--tx2)', lineHeight: 1.5 }}>{d.description}</p>

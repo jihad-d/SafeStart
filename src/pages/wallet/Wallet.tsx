@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { RefreshCw, ArrowRightLeft, TrendingUp, TrendingDown } from 'lucide-react'
+import { RefreshCw, ArrowRightLeft, TrendingUp, TrendingDown, Euro, Coins, BarChart3 } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { fmtEur, fmtCrypto } from '@/lib/utils'
 import AIPanel from '@/components/ai/AIPanel'
@@ -30,12 +30,12 @@ export default function Wallet() {
       {/* Stats */}
       <div className="stats-grid">
         {[
-          { label: '💶 Solde dispo', value: fmtEur(profile?.simulated_balance_eur ?? 750), color: '' },
-          { label: '💎 Valeur crypto', value: fmtEur(totalPortfolio), color: '' },
-          { label: '📊 P&L total', value: (totalPnl >= 0 ? '+' : '') + fmtEur(totalPnl), color: totalPnl >= 0 ? '#10b981' : '#ef4444' },
+          { icon: Euro, label: 'Solde dispo', value: fmtEur(profile?.simulated_balance_eur ?? 750), color: '' },
+          { icon: Coins, label: 'Valeur crypto', value: fmtEur(totalPortfolio), color: '' },
+          { icon: BarChart3, label: 'P&L total', value: (totalPnl >= 0 ? '+' : '') + fmtEur(totalPnl), color: totalPnl >= 0 ? '#10b981' : '#ef4444' },
         ].map(s => (
           <div key={s.label} className="wallet-card">
-            <div className="stat-label">{s.label}</div>
+            <div className="stat-label ico-inline"><s.icon size={14} />{s.label}</div>
             <div 
               className={`stat-value ${!s.color ? 'wallet-value-gradient' : ''}`} 
               style={s.color ? { color: s.color } : {}}
@@ -94,7 +94,7 @@ export default function Wallet() {
           </div>
         </div>
 
-        <AIPanel initialMessage="Voici ton wallet simulé ! Demande-moi comment diversifier ton portfolio ou ce que signifie le P&L 📊" />
+        <AIPanel initialMessage="Voici ton wallet simulé. Le P&L indique ton gain ou ta perte latente : compare-le au prix d'achat moyen de chaque crypto." />
       </div>
     </div>
   )

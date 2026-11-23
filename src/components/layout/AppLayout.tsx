@@ -21,9 +21,6 @@ const LEARN_NAV = [
   { to: '/challenges', icon: Trophy,    label: 'Challenges' },
   { to: '/progress',   icon: BarChart3, label: 'Progression' },
 ]
-const LEVEL_EMOJI: Record<string, string> = {
-  absolute_beginner: '🌱', curious_novice: '🔍', intermediate: '⚡', advanced: '🚀',
-}
 const LEVEL_LABEL: Record<string, string> = {
   absolute_beginner: 'Débutant absolu', curious_novice: 'Novice curieux',
   intermediate: 'Intermédiaire', advanced: 'Avancé',

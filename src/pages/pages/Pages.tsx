@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { Clock, ChevronDown, ChevronUp, Lock, ChevronRight, Zap, Search, MessageSquare } from 'lucide-react'
+import {
+  Clock, ChevronDown, ChevronUp, Lock, ChevronRight, Zap, Search, MessageSquare,
+  Trophy, ShieldCheck, Coins, Globe, Repeat, Rocket, Target, Award, BarChart3,
+  User, Save, SunMoon, Moon, Sun, Bell, AlertTriangle, Lightbulb,
+} from 'lucide-react'
+import LevelIcon from '@/components/ui/LevelIcon'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useTheme } from '@/lib/hooks/useTheme'
 import { supabase } from '@/lib/supabase'
@@ -26,7 +31,6 @@ type HistoryTx = Transaction & {
 }
 type BadgeRow = {
   name: string
-  icon: string
   pts: number
   desc: string
   unlocked: boolean
@@ -161,7 +165,7 @@ export function History() {
                   ))}
                 </div>
                 <div className="safebot-comment-box">
-                  <p className="safebot-comment-title">💡 Commentaire SafeBot</p>
+                  <p className="safebot-comment-title ico-inline"><Lightbulb size={14} />Analyse de la transaction</p>
                   <p className="safebot-comment-text">{tx.ai}</p>
                 </div>
               </div>
@@ -198,7 +202,7 @@ export function Learn() {
               >
                 {m.level}
               </span>
-              <span className="learn-duration">⏱ {m.dur} min</span>
+              <span className="learn-duration ico-inline"><Clock size={12} />{m.dur} min</span>
             </div>
             <div className="learn-body">
               <div className="learn-title">{m.title}</div>
@@ -220,12 +224,12 @@ export function Learn() {
 
 // ─── CHALLENGES 
 const CHALLENGES = [
-  { title: 'Premier achat',          desc: 'Simule ton premier achat de cryptomonnaie.',     obj: '1 achat simulé',           level: 'Débutant',      lvlColor: '#10b981', pts: 100, icon: '🏆', premium: false },
-  { title: 'Acheteur prudent',       desc: 'Achète du BTC avec un score de sécurité vert.',  obj: 'Score ≥ 70/100',           level: 'Débutant',      lvlColor: '#10b981', pts: 150, icon: '🛡️', premium: false },
-  { title: 'Maître des frais',       desc: 'Effectue un achat avec moins de 0.5% de frais.', obj: 'Frais < 0.5%',             level: 'Débutant',      lvlColor: '#10b981', pts: 120, icon: '💰', premium: false },
-  { title: 'Portefeuille diversifié',desc: 'Détenir au moins 3 cryptos différentes.',         obj: '3 cryptos dans le portfolio',level:'Intermédiaire', lvlColor: '#6366f1', pts: 200, icon: '🌍', premium: false },
-  { title: 'Swap intelligent',       desc: 'Réalise un swap avec un slippage < 1%.',          obj: 'Slippage < 1%',            level: 'Intermédiaire', lvlColor: '#6366f1', pts: 250, icon: '🔄', premium: false },
-  { title: 'Explorateur DeFi',       desc: 'Réalise 5 swaps variés.',                         obj: '5 swaps différents',        level: 'Avancé',        lvlColor: '#f59e0b', pts: 400, icon: '🚀', premium: true  },
+  { title: 'Premier achat',          desc: 'Simule ton premier achat de cryptomonnaie.',     obj: '1 achat simulé',           level: 'Débutant',      lvlColor: '#10b981', pts: 100, icon: Trophy, premium: false },
+  { title: 'Acheteur prudent',       desc: 'Achète du BTC avec un score de sécurité vert.',  obj: 'Score ≥ 70/100',           level: 'Débutant',      lvlColor: '#10b981', pts: 150, icon: ShieldCheck, premium: false },
+  { title: 'Maître des frais',       desc: 'Effectue un achat avec moins de 0.5% de frais.', obj: 'Frais < 0.5%',             level: 'Débutant',      lvlColor: '#10b981', pts: 120, icon: Coins, premium: false },
+  { title: 'Portefeuille diversifié',desc: 'Détenir au moins 3 cryptos différentes.',         obj: '3 cryptos dans le portfolio',level:'Intermédiaire', lvlColor: '#6366f1', pts: 200, icon: Globe, premium: false },
+  { title: 'Swap intelligent',       desc: 'Réalise un swap avec un slippage < 1%.',          obj: 'Slippage < 1%',            level: 'Intermédiaire', lvlColor: '#6366f1', pts: 250, icon: Repeat, premium: false },
+  { title: 'Explorateur DeFi',       desc: 'Réalise 5 swaps variés.',                         obj: '5 swaps différents',        level: 'Avancé',        lvlColor: '#f59e0b', pts: 400, icon: Rocket, premium: true  },
 ]
 
 export function Challenges() {
@@ -257,7 +261,7 @@ export function Challenges() {
           >
             <div className="challenge-header">
               <div className="challenge-badge-group">
-                <span className="challenge-icon">{c.icon}</span>
+                <span className="challenge-icon"><c.icon size={22} /></span>
                 <span 
                   className="challenge-lvl-badge"
                   style={{ background: `${c.lvlColor}22`, color: c.lvlColor }}
@@ -269,7 +273,7 @@ export function Challenges() {
             </div>
             <div className="challenge-title">{c.title}</div>
             <div className="challenge-desc">{c.desc}</div>
-            <div className="challenge-obj">🎯 {c.obj}</div>
+            <div className="challenge-obj ico-inline"><Target size={13} />{c.obj}</div>
             <div className="challenge-footer">
               {c.premium && !profile?.is_premium
                 ? <button className="btn-glass challenge-btn"><Lock size={12} />Déverrouiller (Premium)</button>
@@ -319,7 +323,6 @@ export function Progress() {
         .filter((row) => row.badges?.name)
         .map((row) => ({
           name: row.badges?.name ?? 'Badge',
-          icon: row.badges?.icon ?? '🏅',
           pts: row.badges?.pts ?? 0,
           desc: row.badges?.desc ?? '',
           unlocked: row.unlocked ?? Boolean(row.earned_at),
@@ -336,7 +339,7 @@ export function Progress() {
       {/* Level card */}
       <div className="dashboard-card lvl-card">
         <div className="lvl-container">
-          <div className="lvl-emoji">🌱</div>
+          <div className="lvl-emoji"><LevelIcon level={profile?.level} size={40} strokeWidth={1.6} /></div>
           <div className="lvl-body">
             <div className="lvl-tagline">Ton niveau actuel</div>
             <div className="lvl-title">Débutant absolu</div>
@@ -351,13 +354,13 @@ export function Progress() {
 
       {/* Stats */}
       <div className="grid-three-columns">
-        {[
-          ['📊', 'Transactions', '3'],
-          ['🛡️', 'Score moyen', '78/100'],
-          ['🏅', 'Badges', `${badges.filter(b => b.unlocked).length}/${badges.length || 7}`]
-        ].map(([ico, l, v]) => (
+        {([
+          [BarChart3, 'Transactions', '3'],
+          [ShieldCheck, 'Score moyen', '78/100'],
+          [Award, 'Badges', `${badges.filter(b => b.unlocked).length}/${badges.length || 7}`]
+        ] as const).map(([Ico, l, v]) => (
           <div key={l} className="dashboard-card progress-stat-card">
-            <div className="progress-stat-ico">{ico}</div>
+            <div className="progress-stat-ico"><Ico size={24} /></div>
             <div className="progress-stat-val">{v}</div>
             <div className="progress-stat-label">{l}</div>
           </div>
@@ -382,7 +385,7 @@ export function Progress() {
 
       {/* Badges */}
       <div className="dashboard-card">
-        <div className="skill-section-title">🏅 Badges ({badges.filter(b => b.unlocked).length} / {badges.length})</div>
+        <div className="skill-section-title ico-inline"><Award size={16} />Badges ({badges.filter(b => b.unlocked).length} / {badges.length})</div>
         <div className="badge-grid">
           {badges.map(b => (
             <div 
@@ -393,7 +396,7 @@ export function Progress() {
                 filter: b.unlocked ? 'none' : 'grayscale(1)' 
               }}
             >
-              <div className="badge-emoji">{b.icon}</div>
+              <div className="badge-emoji"><Award size={28} /></div>
               <div className="badge-name">{b.name}</div>
               <div className="badge-desc">{b.desc}</div>
               <div className="badge-pts">+{b.pts} pts</div>
@@ -407,10 +410,10 @@ export function Progress() {
 
 // ─── SETTINGS 
 const LEVEL_LABEL: Record<string, string> = {
-  absolute_beginner: '🌱 Débutant absolu',
-  curious_novice: '🔍 Novice curieux',
-  intermediate: '📈 Intermédiaire',
-  advanced: '🚀 Avancé',
+  absolute_beginner: 'Débutant absolu',
+  curious_novice: 'Novice curieux',
+  intermediate: 'Intermédiaire',
+  advanced: 'Avancé',
 }
 
 export function Settings() {
@@ -439,7 +442,7 @@ export function Settings() {
 
       {/* Profile */}
       <div className="dashboard-card">
-        <div className="settings-section-title">👤 Mon profil</div>
+        <div className="settings-section-title ico-inline"><User size={16} />Mon profil</div>
         <div className="settings-form-group">
           <label className="settings-label">Email</label>
           <input className="glass-input settings-input-disabled" value={profile?.email ?? ''} disabled />
@@ -452,21 +455,21 @@ export function Settings() {
           <label className="settings-label">Niveau actuel</label>
           <input className="glass-input settings-input-disabled" value={LEVEL_LABEL[profile?.level ?? 'absolute_beginner']} disabled />
         </div>
-        <button className="btn-pri settings-btn-save" onClick={save}>💾 Sauvegarder</button>
+        <button className="btn-pri settings-btn-save" onClick={save}><span className="ico-inline"><Save size={15} />Sauvegarder</span></button>
       </div>
 
       {/* Theme */}
       <div className="dashboard-card">
-        <div className="settings-section-title">🌓 Apparence</div>
+        <div className="settings-section-title ico-inline"><SunMoon size={16} />Apparence</div>
         <div className="appearance-grid">
-          <button className={`btn-glass appearance-btn ${theme === 'dark' ? 'active' : ''}`} aria-pressed={theme === 'dark'} onClick={() => setTheme('dark')}>🌙 Sombre</button>
-          <button className={`btn-glass appearance-btn ${theme === 'light' ? 'active' : ''}`} aria-pressed={theme === 'light'} onClick={() => setTheme('light')}>☀️ Clair</button>
+          <button className={`btn-glass appearance-btn ${theme === 'dark' ? 'active' : ''}`} aria-pressed={theme === 'dark'} onClick={() => setTheme('dark')}><span className="ico-inline"><Moon size={15} />Sombre</span></button>
+          <button className={`btn-glass appearance-btn ${theme === 'light' ? 'active' : ''}`} aria-pressed={theme === 'light'} onClick={() => setTheme('light')}><span className="ico-inline"><Sun size={15} />Clair</span></button>
         </div>
       </div>
 
       {/* Notifications */}
       <div className="dashboard-card">
-        <div className="notification-title-block">🔔 Notifications</div>
+        <div className="notification-title-block ico-inline"><Bell size={16} />Notifications</div>
         {[
           { label: "Rappels d'activité", sub: 'Relances si inactif depuis 3 jours', val: notifReminders, set: () => setNotifReminders(!notifReminders) },
           { label: 'Alertes marché (±10%)', sub: 'Variation importante dans ton portfolio', val: notifMarket, set: () => setNotifMarket(!notifMarket) },
@@ -484,7 +487,7 @@ export function Settings() {
 
       {/* Danger zone */}
       <div className="dashboard-card danger-card">
-        <div className="danger-title">⚠️ Zone de danger</div>
+        <div className="danger-title ico-inline"><AlertTriangle size={16} />Zone de danger</div>
         <div className="danger-row border-bottom">
           <div>
             <div className="danger-label">Réinitialiser le portfolio</div>
@@ -497,7 +500,7 @@ export function Settings() {
             <div className="danger-label critical">Supprimer mon compte</div>
             <div className="danger-sub">Suppression sous 72h (RGPD).</div>
           </div>
-          <button className="danger-btn-delete" onClick={() => toast('Fonctionnalité disponible en production.', { icon: '⚠️' })}>Supprimer</button>
+          <button className="danger-btn-delete" onClick={() => toast('Fonctionnalité disponible en production.', { icon: <AlertTriangle size={16} color="#f59e0b" /> })}>Supprimer</button>
         </div>
       </div>
     </div>
@@ -512,7 +515,7 @@ const FAQ_ITEMS = [
   { q: "Qu'est-ce que le score de sécurité ?", a: "Le score (vert/orange/rouge) évalue le risque d'une transaction avant que tu la confirmes. Il prend en compte le montant vs ton solde, la volatilité de la crypto, le slippage pour les swaps, et la validité de l'adresse pour les envois." },
   { q: "Qu'est-ce qu'un gas fee ?", a: "Les gas fees sont des frais payés au réseau blockchain pour valider ta transaction. Sur SafeStart, ces frais sont simulés pour t'habituer à les prendre en compte." },
   { q: "Comment puis-je améliorer mon niveau ?", a: "Ton niveau évolue automatiquement avec tes transactions simulées, les challenges complétés et les modules terminés. Plus tu pratiques, plus SafeBot adapte son niveau de langage." },
-  { q: "Comment réinitialiser mon portfolio ?", a: "Dans Paramètres → Zone de danger, tu peux réinitialiser ton portfolio fictif. Ton solde repart à 1 000 € simulés, ta progression est conservée." },
+  { q: "Comment réinitialiser mon portfolio ?", a: "Dans Paramètres, section Zone de danger, tu peux réinitialiser ton portfolio fictif. Ton solde repart à 1 000 € simulés, ta progression est conservée." },
 ]
 
 export function Help() {

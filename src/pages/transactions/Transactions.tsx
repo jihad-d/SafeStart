@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import { ShoppingCart, Send, ArrowLeftRight, CheckCircle, AlertTriangle } from 'lucide-react'
+import { ShoppingCart, Send, ArrowLeftRight, CheckCircle, AlertTriangle, XCircle, Lightbulb, ArrowRight, ArrowLeft } from 'lucide-react'
 import { MOCK_PRICES, fmtEur, fmtCrypto, calcSecurityScore, simulateFees, simulateGas, simulateSlippage, validateAddress } from '@/lib/utils'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
@@ -128,7 +128,7 @@ export default function Transactions() {
           Simulation de {tab === 'buy' ? 'l\'achat' : tab === 'send' ? 'l\'envoi' : 'l\'échange'} de {fmtEur(parseFloat(amount))} enregistrée. +10 pts !
         </p>
         <div className="tx-ai-feedback-box">
-          <p className="tx-ai-feedback-title">💡 SafeBot</p>
+          <p className="tx-ai-feedback-title ico-inline"><Lightbulb size={14} />Conseil SafeStart</p>
           <p className="tx-ai-feedback-body">
             {score?.label === 'safe' && "Excellent choix ! Ton score de sécurité est vert — tu as bien géré le risque. Continue comme ça !"}
             {score?.label === 'warning' && "Transaction enregistrée ! Note que ton score était modéré. La prochaine fois, essaie de réduire le montant pour améliorer ton score."}
@@ -199,7 +199,7 @@ export default function Transactions() {
                   <input className="glass-input tx-input-monospace" placeholder="0x... ou adresse Bitcoin" value={address} onChange={e => setAddress(e.target.value)} />
                   {address && (
                     <p className={`tx-address-status ${validateAddress(address) ? 'tx-address-valid' : 'tx-address-invalid'}`}>
-                      {validateAddress(address) ? '✅ Format valide' : '❌ Format invalide — vérifie chaque caractère'}
+                      <span className="ico-inline">{validateAddress(address) ? <><CheckCircle size={13} />Format valide</> : <><XCircle size={13} />Format invalide — vérifie chaque caractère</>}</span>
                     </p>
                   )}
                 </div>
@@ -231,7 +231,7 @@ export default function Transactions() {
                 </div>
               )}
 
-              <button className="btn-pri tx-btn-full" onClick={proceed}>Voir le récapitulatif →</button>
+              <button className="btn-pri tx-btn-full" onClick={proceed}><span className="ico-inline">Voir le récapitulatif <ArrowRight size={15} /></span></button>
             </div>
           )}
 
@@ -259,10 +259,10 @@ export default function Transactions() {
               <div className="tx-divider" />
               <SecurityScoreBadge score={score} />
               <div className="tx-summary-actions">
-                <button className="btn-glass tx-btn-flex" onClick={() => setStep('form')}>← Modifier</button>
+                <button className="btn-glass tx-btn-flex" onClick={() => setStep('form')}><span className="ico-inline"><ArrowLeft size={15} />Modifier</span></button>
                 <button className="btn-pri tx-btn-flex" onClick={confirm} disabled={confirming}>
                   <div className="tx-btn-confirm-content">
-                    {confirming ? <span className="tx-spinner spin" /> : '✅ Confirmer'}
+                    {confirming ? <span className="tx-spinner spin" /> : <span className="ico-inline"><CheckCircle size={15} />Confirmer</span>}
                   </div>
                 </button>
               </div>
@@ -270,7 +270,7 @@ export default function Transactions() {
           )}
         </div>
 
-        <AIPanel initialMessage={`Je suis là pour t'accompagner ! Pose-moi des questions sur ${coin?.name ?? 'la crypto'}, les frais ou les risques associés. 💡`} />
+        <AIPanel initialMessage={`Avant de confirmer, vérifie le montant, les frais et le score de sécurité de ton opération sur ${coin?.name ?? 'cette crypto'}.`} />
       </div>
     </div>
   )

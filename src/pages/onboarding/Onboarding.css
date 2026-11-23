@@ -271,3 +271,15 @@
   padding: 13px;
   margin-top: 16px;
 }
+/* Icônes (remplacent les anciens emojis) */
+.ob-intro-emoji,
+.ob-result-emoji {
+  display: flex;
+  justify-content: center;
+  color: var(--pri2);
+}
+
+.ob-intro-info-emoji {
+  display: inline-flex;
+  color: var(--pri2);
+}

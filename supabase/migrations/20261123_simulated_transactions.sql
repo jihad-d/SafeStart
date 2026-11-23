@@ -1,39 +1,8 @@
--- SafeStart : quota SafeBot côté serveur + enregistrement atomique des transactions
+-- SafeStart : enregistrement atomique des transactions simulées
 -- À exécuter une fois dans Supabase > SQL Editor.
 
 -- ─────────────────────────────────────────────────────────────
--- 1. Quota SafeBot journalier
--- ─────────────────────────────────────────────────────────────
-alter table public.profiles
-  add column if not exists ai_messages_date date not null default current_date;
-
--- Consomme un message SafeBot pour l'utilisateur.
--- Remet le compteur à zéro au changement de jour, refuse si la limite est atteinte.
--- Retourne le nombre de messages utilisés aujourd'hui, ou NULL si la limite est atteinte.
-create or replace function public.consume_ai_message(p_user_id uuid)
-returns table (used int, quota int)
-language plpgsql
-security definer
-set search_path = public
-as $$
-begin
-  return query
-  update public.profiles p
-     set ai_messages_today = case when p.ai_messages_date < current_date then 1
-                                  else p.ai_messages_today + 1 end,
-         ai_messages_date  = current_date
-   where p.id = p_user_id
-     and (p.ai_messages_date < current_date or p.ai_messages_today < p.ai_messages_limit)
-  returning p.ai_messages_today, p.ai_messages_limit;
-end;
-$$;
-
--- Seule l'API serveur (service_role) peut consommer le quota.
-revoke all on function public.consume_ai_message(uuid) from public, anon, authenticated;
-grant execute on function public.consume_ai_message(uuid) to service_role;
-
--- ─────────────────────────────────────────────────────────────
--- 2. Transaction simulée atomique
+-- Transaction simulée atomique
 --    (insert transaction + portfolio + solde/points en une seule transaction SQL)
 -- ─────────────────────────────────────────────────────────────
 create or replace function public.record_simulated_transaction(

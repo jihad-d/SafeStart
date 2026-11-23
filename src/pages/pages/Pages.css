@@ -745,3 +745,16 @@
 .support-btn-action {
   flex: 1;
 }
+/* Icônes (remplacent les anciens emojis) */
+.challenge-icon,
+.lvl-emoji {
+  display: inline-flex;
+  color: var(--pri2);
+}
+
+.progress-stat-ico,
+.badge-emoji {
+  display: flex;
+  justify-content: center;
+  color: var(--pri2);
+}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight, CheckCircle, XCircle } from 'lucide-react'
+import { ChevronRight, CheckCircle, XCircle, Target, Clock, Lightbulb } from 'lucide-react'
+import LevelIcon from '@/components/ui/LevelIcon'
 import { useAuth } from '@/lib/hooks/useAuth'
 import './Onboarding.css'
 
@@ -13,9 +14,9 @@ const QUESTIONS = [
 ]
 
 const LEVELS = [
-  { id: 'absolute_beginner', label: 'Débutant absolu', emoji: '🌱', desc: "Tu pars de zéro, et c'est parfait ! SafeStart va t'accompagner pas à pas." },
-  { id: 'curious_novice',    label: 'Novice curieux',  emoji: '🔍', desc: "Tu as des bases solides. On va approfondir ensemble tes connaissances." },
-  { id: 'intermediate',      label: 'Intermédiaire',   emoji: '⚡', desc: "Tu maîtrises les fondamentaux. Prêt pour des opérations plus avancées ?" },
+  { id: 'absolute_beginner', label: 'Débutant absolu', desc: "Tu pars de zéro, et c'est parfait ! SafeStart va t'accompagner pas à pas." },
+  { id: 'curious_novice',    label: 'Novice curieux',  desc: "Tu as des bases solides. On va approfondir ensemble tes connaissances." },
+  { id: 'intermediate',      label: 'Intermédiaire',   desc: "Tu maîtrises les fondamentaux. Prêt pour des opérations plus avancées ?" },
 ]
 
 export default function Onboarding() {
@@ -56,14 +57,14 @@ export default function Onboarding() {
   if (phase === 'intro') return (
     <div className="ob-wrap">
       <div className="glass-card fade-up ob-card-intro">
-        <div className="ob-intro-emoji">🎯</div>
+        <div className="ob-intro-emoji"><Target size={44} strokeWidth={1.6} /></div>
         <h1 className="ob-intro-title">Évaluation de niveau</h1>
         <p className="ob-intro-desc">
           Réponds à <strong>{QUESTIONS.length} questions rapides</strong> sur la crypto.<br/>
-          Pas de pression — c'est pour adapter SafeStart à toi. 😊
+          Pas de pression — c'est pour adapter SafeStart à toi.
         </p>
         <div className="ob-intro-info-box">
-          <span className="ob-intro-info-emoji">⏱️</span>
+          <span className="ob-intro-info-emoji"><Clock size={22} /></span>
           <div>
             <div className="ob-intro-info-title">Environ 2 minutes</div>
             <div className="ob-intro-info-subtitle">Tu peux refaire l'évaluation depuis les paramètres</div>
@@ -79,20 +80,20 @@ export default function Onboarding() {
   if (phase === 'result') return (
     <div className="ob-wrap">
       <div className="glass-card fade-up ob-card-result">
-        <div className="ob-result-emoji">{levelInfo.emoji}</div>
+        <div className="ob-result-emoji"><LevelIcon level={levelInfo.id} size={48} strokeWidth={1.6} /></div>
         <h2 className="ob-result-title">{levelInfo.label}</h2>
         <div className="ob-result-score">{finalScore} / {QUESTIONS.length} bonnes réponses</div>
         <div className="ob-progress-container ob-mb-20">
           <div className="ob-progress-bar-fill-result" style={{ width: `${(finalScore/QUESTIONS.length)*100}%` }} />
         </div>
         <div className="ob-result-message-box">
-          <div className="ob-safebot-title">💡 SafeBot</div>
+          <div className="ob-safebot-title ico-inline"><Lightbulb size={14} />Prochaine étape</div>
           <p className="ob-safebot-text">
             Bienvenue sur SafeStart ! Ton profil <strong>"{levelInfo.label}"</strong> a été enregistré.
             {levelInfo.id === 'absolute_beginner' && " Je vais t'expliquer chaque concept avec des exemples simples du quotidien."}
             {levelInfo.id === 'curious_novice' && " Je vais approfondir tes connaissances progressivement."}
             {levelInfo.id === 'intermediate' && " On va directement aller dans les détails techniques qui t'intéressent !"}
-            {" Commence par simuler ton premier achat crypto ! 🚀"}
+            {" Commence par simuler ton premier achat crypto !"}
           </p>
         </div>
         <button className="btn-pri ob-full-btn" onClick={() => navigate('/dashboard')}>
@@ -139,7 +140,7 @@ export default function Onboarding() {
           {showExp && (
             <div className="ob-explanation-box fade-up">
               <p className="ob-explanation-status">
-                {selected === q.correct ? '✅ Bonne réponse !' : '❌ Pas tout à fait...'}
+                <span className="ico-inline">{selected === q.correct ? <><CheckCircle size={15} />Bonne réponse !</> : <><XCircle size={15} />Pas tout à fait...</>}</span>
               </p>
               <p className="ob-explanation-text">{q.exp}</p>
             </div>
@@ -147,7 +148,7 @@ export default function Onboarding() {
 
           {selected !== null && (
             <button className="btn-pri fade-up ob-next-btn" onClick={next}>
-              {cur < QUESTIONS.length - 1 ? 'Question suivante' : 'Voir mon résultat'} →
+              <span className="ico-inline">{cur < QUESTIONS.length - 1 ? 'Question suivante' : 'Voir mon résultat'} <ChevronRight size={15} /></span>
             </button>
           )}
         </div>

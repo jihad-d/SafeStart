@@ -16,7 +16,7 @@
 |---|---|
 | 🎓 **Mode simulation** | Effectue des achats, envois et swaps de crypto avec un solde fictif |
 | 🔒 **Score de sécurité** | Analyse chaque transaction (montant, volatilité, adresse) et attribue un score 0–100 |
-| 🤖 **SafeBot IA** | Agent pédagogique qui répond aux questions crypto en langage simple |
+| 🤖 **SafeBot** | Assistant pédagogique — *échanges IA actuellement suspendus* |
 | 📊 **Portfolio live** | Suivi de tes actifs simulés avec P&L et sparklines |
 | 🏆 **Gamification** | Points, niveaux (Débutant → Avancé), challenges et modules d'apprentissage |
 | 🌗 **Thème dark/light** | Basculement en un clic, persisté via classe CSS sur `<html>` |
@@ -68,7 +68,7 @@ safestart-vite/
 ├── src/
 │   ├── components/
 │   │   ├── ai/
-│   │   │   └── AIPanel.tsx          # Chat SafeBot (réponses simulées)
+│   │   │   └── AIPanel.tsx          # Panneau SafeBot (en pause)
 │   │   ├── layout/
 │   │   │   └── AppLayout.tsx        # Sidebar + topbar + Outlet
 │   │   └── transactions/
@@ -160,16 +160,12 @@ Ajoute la classe `.light` sur `<html>` pour activer le thème clair (géré par 
 
 Copie `.env.example` → `.env.local` et renseigne :
 
-| Variable | Où | Rôle |
-|---|---|---|
-| `VITE_SUPABASE_URL` | navigateur | URL du projet Supabase |
-| `VITE_SUPABASE_ANON_KEY` | navigateur | Clé publique (anon) Supabase |
-| `ANTHROPIC_API_KEY` | **serveur** | Clé IA utilisée par `/api/safebot` |
-| `SUPABASE_SERVICE_ROLE_KEY` | **serveur** | Vérifie la session et décompte le quota SafeBot |
+```env
+VITE_SUPABASE_URL=https://xxxx.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
 
-> ⚠️ Tout ce qui commence par `VITE_` est inclus dans le JavaScript envoyé aux visiteurs. Ne mets **jamais** de clé secrète derrière ce préfixe.
->
-> En production, ajoute les variables serveur dans Vercel → *Settings → Environment Variables*. En local, `npm run dev` sert aussi `/api/safebot`.
+> ⚠️ Tout ce qui commence par `VITE_` est inclus dans le JavaScript envoyé aux visiteurs. Ne mets **jamais** de clé secrète derrière ce préfixe. Aucune clé IA n'est nécessaire : SafeBot est suspendu.
 
 ---
 
@@ -188,9 +184,8 @@ Le hook `useAuth` attend une table `profiles` avec les colonnes suivantes :
 | `onboarding_completed` | `bool` | Onboarding terminé ? |
 | `ai_messages_today` | `int` | Messages SafeBot du jour |
 | `ai_messages_limit` | `int` | Limite journalière (défaut: 20) |
-| `ai_messages_date` | `date` | Jour du dernier message compté (remise à zéro quotidienne) |
 
-Exécute ensuite [`supabase/migrations/20261123_safebot_quota_and_transactions.sql`](supabase/migrations/20261123_safebot_quota_and_transactions.sql) dans *Supabase → SQL Editor* : il ajoute la colonne `ai_messages_date`, la fonction de quota SafeBot et l'enregistrement atomique des transactions simulées.
+Exécute ensuite [`supabase/migrations/20261123_simulated_transactions.sql`](supabase/migrations/20261123_simulated_transactions.sql) dans *Supabase → SQL Editor* : il ajoute la fonction qui enregistre les transactions simulées de façon atomique (historique, portfolio et solde).
 
 ---
 

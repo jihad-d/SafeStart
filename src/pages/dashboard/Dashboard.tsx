@@ -4,11 +4,11 @@ import { ArrowRight, Zap, TrendingUp, TrendingDown } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 import { fmtEur } from '@/lib/utils'
+import LevelIcon from '@/components/ui/LevelIcon'
 import AIPanel from '@/components/ai/AIPanel.tsx'
 import type { PortfolioAsset } from '@/types'
 import './Dashboard.css'
 
-const LEVEL_EMOJI: Record<string,string> = { absolute_beginner:'🌱', curious_novice:'🔍', intermediate:'⚡', advanced:'🚀' }
 const LEVEL_LABEL: Record<string,string> = { absolute_beginner:'Débutant absolu', curious_novice:'Novice curieux', intermediate:'Intermédiaire', advanced:'Avancé' }
 
 const RECENT_TXS = [
@@ -77,11 +77,11 @@ export default function Dashboard() {
       {/* Header */}
       <div className="dashboard-header">
         <div>
-          <div className="dashboard-greeting">Bon retour 👋</div>
+          <div className="dashboard-greeting">Bon retour</div>
           <h1 className="dashboard-title">
             {profile?.username ?? profile?.email?.split('@')[0]},<br/>
             <span className="dashboard-title-gradient">
-              {LEVEL_LABEL[profile?.level ?? 'absolute_beginner']} {LEVEL_EMOJI[profile?.level ?? 'absolute_beginner']}
+              <span className="ico-inline">{LEVEL_LABEL[profile?.level ?? 'absolute_beginner']} <LevelIcon level={profile?.level} size={14} /></span>
             </span>
           </h1>
         </div>
@@ -154,7 +154,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <AIPanel initialMessage={`Bonjour ! Je suis SafeBot 🤖\n\nTu as ${fmtEur(balance)} de solde fictif disponible. Pose-moi n'importe quelle question sur la crypto !`} />
+        <AIPanel initialMessage={`Tu as ${fmtEur(balance)} de solde fictif disponible. Commence par une petite simulation pour te familiariser avec les frais et le score de sécurité.`} />
       </div>
 
       {/* Transactions récentes */}

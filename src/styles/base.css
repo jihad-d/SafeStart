@@ -45,3 +45,11 @@ body::before {
   height: 1px;
   background: var(--border2);
 }
+
+/* Icône + texte alignés sur une ligne */
+.ico-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  vertical-align: middle;
+}
