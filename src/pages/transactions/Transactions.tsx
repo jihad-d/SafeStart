@@ -6,7 +6,7 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 import SecurityScoreBadge from '@/components/transactions/SecurityScoreBadge'
 import AIPanel from '@/components/ai/AIPanel'
-import type { PortfolioAsset, TxType } from '@/types'
+import type { TxType } from '@/types'
 import toast from 'react-hot-toast'
 import './Transactions.css' 
 
@@ -20,7 +20,7 @@ const PORTFOLIO_VALUE = 248
 type SummaryRow = [string, string]
 
 export default function Transactions() {
-  const { profile, updateProfile } = useAuth()
+  const { profile, patchProfile } = useAuth()
   const [params] = useSearchParams()
   const navigate = useNavigate()
 
@@ -51,7 +51,7 @@ export default function Transactions() {
 
   const proceed = () => {
     if (!amount || parseFloat(amount) <= 0) { toast.error('Saisis un montant valide.'); return }
-    if (parseFloat(amount) > (profile?.simulated_balance_eur ?? 750)) { toast.error('Solde insuffisant.'); return }
+    if (parseFloat(amount) + (tab === 'buy' ? fees : 0) > (profile?.simulated_balance_eur ?? 750)) { toast.error('Solde insuffisant (frais inclus).'); return }
     if (tab === 'send' && !validateAddress(address)) { toast.error('Adresse wallet invalide.'); return }
     setStep('summary')
   }
@@ -62,77 +62,56 @@ export default function Transactions() {
     try {
       await new Promise(r => setTimeout(r, 800))
 
+      const cost = parseFloat(amount) + (tab === 'buy' ? fees : 0)
+
       if (profile && profile.id !== 'demo' && supabase) {
         const aiComment =
           score?.label === 'safe'
-            ? 'Transaction bien parametree avec un niveau de risque faible.'
+            ? 'Transaction bien paramétrée avec un niveau de risque faible.'
             : score?.label === 'warning'
-              ? 'Transaction correcte, mais certains parametres meritent verification.'
-              : 'Transaction enregistree avec un niveau de risque eleve.'
+              ? 'Transaction correcte, mais certains paramètres méritent vérification.'
+              : 'Transaction enregistrée avec un niveau de risque élevé.'
 
-        const { error: transactionError } = await supabase.from('transactions').insert({
-          user_id: profile.id,
-          type: tab,
-          crypto_name: coin.name,
-          crypto_symbol: coin.symbol,
-          amount_eur: parseFloat(amount),
-          quantity: qty,
-          fees_eur: tab === 'buy' ? fees : null,
-          to_address: tab === 'send' ? address : null,
-          gas_fee_eur: tab === 'send' ? gas : null,
-          from_crypto_symbol: tab === 'swap' ? coin.symbol : null,
-          to_crypto_symbol: tab === 'swap' ? swapTo.symbol : null,
-          slippage_percentage: tab === 'swap' ? slippage : null,
-          security_score: score?.score ?? 0,
-          security_score_label: score?.label ?? 'warning',
-          ai_comment: aiComment,
+        // Une seule transaction SQL : historique + portfolio + solde/points (tout ou rien)
+        const { data, error } = await supabase.rpc('record_simulated_transaction', {
+          p_type: tab,
+          p_crypto_id: coin.id,
+          p_crypto_name: coin.name,
+          p_crypto_symbol: coin.symbol,
+          p_crypto_image: coin.image,
+          p_price_eur: coin.current_price,
+          p_amount_eur: parseFloat(amount),
+          p_quantity: qty,
+          p_fees_eur: tab === 'buy' ? fees : null,
+          p_to_address: tab === 'send' ? address : null,
+          p_gas_fee_eur: tab === 'send' ? gas : null,
+          p_from_crypto_symbol: tab === 'swap' ? coin.symbol : null,
+          p_to_crypto_symbol: tab === 'swap' ? swapTo.symbol : null,
+          p_slippage_percentage: tab === 'swap' ? slippage : null,
+          p_security_score: score?.score ?? 0,
+          p_security_score_label: score?.label ?? 'warning',
+          p_ai_comment: aiComment,
         })
 
-        if (transactionError) throw transactionError
-
-        if (tab === 'buy') {
-          const { data: existingAsset, error: assetFetchError } = await supabase
-            .from('portfolio_assets')
-            .select('*')
-            .eq('user_id', profile.id)
-            .eq('crypto_id', coin.id)
-            .single()
-
-          if (assetFetchError && assetFetchError.code !== 'PGRST116') throw assetFetchError
-
-          const asset = existingAsset as PortfolioAsset | null
-          const existingQuantity = asset?.quantity ?? 0
-          const existingAvgPrice = asset?.avg_buy_price ?? 0
-          const nextQuantity = existingQuantity + qty
-          const nextAvgPrice =
-            nextQuantity > 0
-              ? ((existingQuantity * existingAvgPrice) + (qty * coin.current_price)) / nextQuantity
-              : coin.current_price
-
-          const { error: portfolioError } = await supabase.from('portfolio_assets').upsert({
-            user_id: profile.id,
-            crypto_id: coin.id,
-            crypto_symbol: coin.symbol,
-            crypto_name: coin.name,
-            crypto_image: coin.image,
-            quantity: nextQuantity,
-            avg_buy_price: nextAvgPrice,
-            current_price: coin.current_price,
-          }, { onConflict: 'user_id,crypto_id' })
-
-          if (portfolioError) throw portfolioError
+        if (error) throw error
+        const row = (Array.isArray(data) ? data[0] : data) as { new_balance: number; new_points: number } | null
+        if (row) {
+          patchProfile({ simulated_balance_eur: Number(row.new_balance), total_points: row.new_points })
         }
+      } else {
+        // Mode démo : rien n'est enregistré, mise à jour locale uniquement
+        patchProfile({
+          total_points: (profile?.total_points ?? 0) + 10,
+          simulated_balance_eur: (profile?.simulated_balance_eur ?? 750) - cost,
+        })
       }
 
-      await updateProfile({
-        total_points: (profile?.total_points ?? 0) + 10,
-        simulated_balance_eur: (profile?.simulated_balance_eur ?? 750) - parseFloat(amount) - fees,
-      })
       setStep('done')
       toast.success('Transaction simulée ! +10 pts')
     } catch (error) {
       console.error(error)
-      toast.error('Impossible d enregistrer la transaction.')
+      const message = (error as { message?: string })?.message ?? ''
+      toast.error(message.includes('Solde insuffisant') ? 'Solde insuffisant.' : "Impossible d'enregistrer la transaction.")
     } finally {
       setConfirming(false)
     }
