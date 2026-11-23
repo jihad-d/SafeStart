@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, AlertCircle } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
 import toast from 'react-hot-toast'
+import { LegalLinks } from '@/pages/legal/Legal'
 import './Login.css'
 
 export default function Login() {
@@ -91,6 +92,7 @@ export default function Login() {
           <Link to="/register" className="login-register-link">Créer un compte</Link>
         </p>
       </div>
+      <LegalLinks className="auth-legal-links" />
     </div>
   )
 }

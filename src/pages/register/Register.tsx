@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react'
+import { Eye, EyeOff, AlertCircle } from 'lucide-react'
+import { LegalLinks } from '@/pages/legal/Legal'
 import { useAuth } from '@/lib/hooks/useAuth'
 import toast from 'react-hot-toast'
 import './Register.css' 
@@ -32,7 +33,7 @@ export default function Register() {
     setError('')
 
     if (!cgu) {
-      setError('Tu dois accepter les conditions generales.')
+      setError("Tu dois accepter les conditions générales d'utilisation.")
       return
     }
     if (pwd !== confirm) {
@@ -113,16 +114,19 @@ export default function Register() {
             <input className="glass-input" type="password" value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="........" required />
           </div>
 
-          <label className="cgu-label-wrapper">
-            <div 
-              onClick={() => setCgu(!cgu)} 
+          <div className="cgu-label-wrapper">
+            <input
+              id="register-cgu"
+              type="checkbox"
               className="cgu-checkbox"
-              style={{ background: cgu ? 'linear-gradient(135deg,#6366f1,#8b5cf6)' : 'var(--glass)' }}
-            >
-              {cgu && <CheckCircle size={14} color="#fff" />}
-            </div>
-            <span className="cgu-text">J'accepte les <span style={{ color: 'var(--pri)' }}>conditions generales</span> et la politique de confidentialite (RGPD)</span>
-          </label>
+              checked={cgu}
+              onChange={e => setCgu(e.target.checked)}
+            />
+            <label htmlFor="register-cgu" className="cgu-text">
+              J'accepte les <Link to="/cgu" target="_blank" rel="noopener">conditions générales d'utilisation</Link> et
+              j'ai lu la <Link to="/confidentialite" target="_blank" rel="noopener">politique de confidentialité</Link>.
+            </label>
+          </div>
 
           <button className="btn-pri register-btn-submit" type="submit" disabled={loading || !cgu}>
             {loading ? <span className="loading-spinner spin" /> : 'Creer mon compte'}
@@ -134,6 +138,7 @@ export default function Register() {
           <Link to="/login" style={{ color: 'var(--pri)', fontWeight: 600 }}>Se connecter</Link>
         </p>
       </div>
+      <LegalLinks className="auth-legal-links" />
     </div>
   )
 }

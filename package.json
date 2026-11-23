@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@fontsource-variable/sora": "^5.3.0",
     "@supabase/supabase-js": "^2.43.4",
     "lucide-react": "^0.400.0",
     "openai": "^6.36.0",

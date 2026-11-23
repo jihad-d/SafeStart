@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
-import { User, Save, SunMoon, Moon, Sun, Bell, AlertTriangle } from 'lucide-react'
+import { User, Save, SunMoon, Moon, Sun, Bell, AlertTriangle, Download, Shield } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { LegalLinks } from '@/pages/legal/Legal'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 import { useTheme } from '@/lib/hooks/useTheme'
@@ -21,7 +23,61 @@ export default function Settings() {
   const [notifChallenges, setNotifChallenges] = useState(false)
   const { theme, setTheme } = useTheme()
 
+  const navigate = useNavigate()
   const [resetting, setResetting] = useState(false)
+  const [exporting, setExporting] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+
+  // Droit à la portabilité : export de toutes les données du compte en JSON
+  const exportData = async () => {
+    if (!profile) return
+    setExporting(true)
+    try {
+      const [transactions, portfolio, badges] = await Promise.all([
+        supabase.from('transactions').select('*').eq('user_id', profile.id),
+        supabase.from('portfolio_assets').select('*').eq('user_id', profile.id),
+        supabase.from('user_badges').select('*').eq('user_id', profile.id),
+      ])
+      const payload = {
+        exported_at: new Date().toISOString(),
+        profile,
+        portfolio: portfolio.data ?? [],
+        transactions: transactions.data ?? [],
+        badges: badges.data ?? [],
+      }
+      const url = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }))
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `safestart-mes-donnees-${new Date().toISOString().slice(0, 10)}.json`
+      link.click()
+      URL.revokeObjectURL(url)
+      toast.success('Tes données ont été téléchargées.')
+    } catch (error) {
+      console.error(error)
+      toast.error("L'export a échoué. Réessaie dans un instant.")
+    } finally {
+      setExporting(false)
+    }
+  }
+
+  // Droit à l'effacement : suppression immédiate et définitive du compte
+  const deleteAccount = async () => {
+    const answer = window.prompt(
+      'Cette action supprime définitivement ton compte et toutes tes données. Elle est irréversible.\n\nTape SUPPRIMER pour confirmer :'
+    )
+    if (answer?.trim().toUpperCase() !== 'SUPPRIMER') return
+    setDeleting(true)
+    const { error } = await supabase.rpc('delete_my_account')
+    if (error) {
+      console.error(error)
+      setDeleting(false)
+      toast.error('La suppression a échoué. Réessaie ou contacte le support.')
+      return
+    }
+    await signOut()
+    toast.success('Ton compte a été supprimé.')
+    navigate('/login')
+  }
 
   const resetSimulation = async () => {
     if (!window.confirm('Réinitialiser ton portfolio ? Ton solde repassera à 1 000 € et tes cryptos simulées seront supprimées. Ton historique et tes points sont conservés.')) return
@@ -98,6 +154,21 @@ export default function Settings() {
         ))}
       </div>
 
+      {/* Données personnelles */}
+      <div className="dashboard-card">
+        <div className="settings-section-title ico-inline"><Shield size={16} />Mes données</div>
+        <div className="danger-row">
+          <div>
+            <div className="danger-label">Télécharger mes données</div>
+            <div className="danger-sub">Profil, portfolio, historique et badges au format JSON.</div>
+          </div>
+          <button className="btn-glass danger-btn-reset" onClick={exportData} disabled={exporting}>
+            <span className="ico-inline"><Download size={15} />{exporting ? 'Export…' : 'Télécharger'}</span>
+          </button>
+        </div>
+        <LegalLinks className="settings-legal-links" />
+      </div>
+
       {/* Danger zone */}
       <div className="dashboard-card danger-card">
         <div className="danger-title ico-inline"><AlertTriangle size={16} />Zone de danger</div>
@@ -111,9 +182,9 @@ export default function Settings() {
         <div className="danger-row">
           <div>
             <div className="danger-label critical">Supprimer mon compte</div>
-            <div className="danger-sub">Suppression sous 72h (RGPD).</div>
+            <div className="danger-sub">Suppression immédiate et définitive du compte et de toutes ses données.</div>
           </div>
-          <button className="danger-btn-delete" onClick={() => toast('Fonctionnalité disponible en production.', { icon: <AlertTriangle size={16} color="#f59e0b" /> })}>Supprimer</button>
+          <button className="danger-btn-delete" onClick={deleteAccount} disabled={deleting}>{deleting ? 'Suppression…' : 'Supprimer'}</button>
         </div>
       </div>
     </div>

@@ -1,18 +1,19 @@
 import type { CryptoAsset, SecurityScore, TxType } from '@/types'
+import { supabase } from '@/lib/supabase'
 
 /** Solde fictif de départ (et après réinitialisation), en euros. */
 export const DEFAULT_BALANCE_EUR = 1000
 
 // ─── Mock fallback data (toujours dispo) ──────────────────────
 export const MOCK_PRICES: CryptoAsset[] = [
-  { id: 'bitcoin',     symbol: 'BTC',  name: 'Bitcoin',   image: 'https://assets.coingecko.com/coins/images/1/thumb/bitcoin.png',   current_price: 65240, price_change_percentage_24h:  2.14 },
-  { id: 'ethereum',    symbol: 'ETH',  name: 'Ethereum',  image: 'https://assets.coingecko.com/coins/images/279/thumb/ethereum.png', current_price:  3185, price_change_percentage_24h: -0.87 },
-  { id: 'solana',      symbol: 'SOL',  name: 'Solana',    image: 'https://assets.coingecko.com/coins/images/4128/thumb/solana.png',  current_price:   143, price_change_percentage_24h:  5.21 },
-  { id: 'binancecoin', symbol: 'BNB',  name: 'BNB',       image: 'https://assets.coingecko.com/coins/images/825/thumb/bnb-icon2_2x.png', current_price: 578, price_change_percentage_24h: 0.43 },
-  { id: 'ripple',      symbol: 'XRP',  name: 'XRP',       image: 'https://assets.coingecko.com/coins/images/44/thumb/xrp-symbol-white-128.png', current_price: 0.582, price_change_percentage_24h: -1.24 },
-  { id: 'cardano',     symbol: 'ADA',  name: 'Cardano',   image: 'https://assets.coingecko.com/coins/images/975/thumb/cardano.png', current_price: 0.421, price_change_percentage_24h: 1.05 },
-  { id: 'avalanche-2', symbol: 'AVAX', name: 'Avalanche', image: 'https://assets.coingecko.com/coins/images/12559/thumb/Avalanche_Circle_RedWhite_Trans.png', current_price: 28.4, price_change_percentage_24h: -2.1 },
-  { id: 'chainlink',   symbol: 'LINK', name: 'Chainlink', image: 'https://assets.coingecko.com/coins/images/877/thumb/chainlink-new-logo.png', current_price: 14.2, price_change_percentage_24h: 3.2 },
+  { id: 'bitcoin',     symbol: 'BTC',  name: 'Bitcoin',   image: '',   current_price: 65240, price_change_percentage_24h:  2.14 },
+  { id: 'ethereum',    symbol: 'ETH',  name: 'Ethereum',  image: '', current_price:  3185, price_change_percentage_24h: -0.87 },
+  { id: 'solana',      symbol: 'SOL',  name: 'Solana',    image: '',  current_price:   143, price_change_percentage_24h:  5.21 },
+  { id: 'binancecoin', symbol: 'BNB',  name: 'BNB',       image: '', current_price: 578, price_change_percentage_24h: 0.43 },
+  { id: 'ripple',      symbol: 'XRP',  name: 'XRP',       image: '', current_price: 0.582, price_change_percentage_24h: -1.24 },
+  { id: 'cardano',     symbol: 'ADA',  name: 'Cardano',   image: '', current_price: 0.421, price_change_percentage_24h: 1.05 },
+  { id: 'avalanche-2', symbol: 'AVAX', name: 'Avalanche', image: '', current_price: 28.4, price_change_percentage_24h: -2.1 },
+  { id: 'chainlink',   symbol: 'LINK', name: 'Chainlink', image: '', current_price: 14.2, price_change_percentage_24h: 3.2 },
 ]
 
 // ─── CoinGecko fetch (best effort) ────────────────────────────
@@ -22,10 +23,31 @@ let cacheTs = 0
 /** Prix en direct (CoinGecko), mis en cache 60 s. `force` ignore le cache. */
 export async function getMarketPrices(force = false): Promise<CryptoAsset[]> {
   if (!force && cachedPrices.length && Date.now() - cacheTs < 60_000) return cachedPrices
+  const prices = (await fetchFromSupabase()) ?? (await fetchFromCoinGecko())
+  if (prices?.length) {
+    cachedPrices = prices
+    cacheTs = Date.now()
+    return prices
+  }
+  return cachedPrices.length ? cachedPrices : MOCK_PRICES
+}
+
+/** Source principale : la fonction Supabase `market-prices` (clé cachée, IP des visiteurs non transmise). */
+async function fetchFromSupabase(): Promise<CryptoAsset[] | null> {
+  try {
+    const { data, error } = await supabase.functions.invoke<CryptoAsset[]>('market-prices', { method: 'GET' })
+    if (error || !Array.isArray(data) || !data.length) return null
+    return data
+  } catch {
+    return null
+  }
+}
+
+/** Secours tant que la fonction Supabase n'est pas déployée : appel direct à CoinGecko. */
+async function fetchFromCoinGecko(): Promise<CryptoAsset[] | null> {
   try {
     const ids = MOCK_PRICES.map(c => c.id).join(',')
     const apiKey = import.meta.env.VITE_COINGECKO_API_KEY
-
     const res = await fetch(
       `https://api.coingecko.com/api/v3/coins/markets?vs_currency=eur&ids=${ids}&order=market_cap_desc&per_page=20&sparkline=false`,
       {
@@ -35,19 +57,17 @@ export async function getMarketPrices(force = false): Promise<CryptoAsset[]> {
     )
     if (!res.ok) throw new Error(`CoinGecko error: ${res.status}`)
     const data = await res.json()
-    cachedPrices = data.map((c: Record<string, unknown>) => ({
+    return data.map((c: Record<string, unknown>) => ({
       id: c.id,
       symbol: (c.symbol as string).toUpperCase(),
       name: c.name,
-      image: c.image,
+      image: '',
       current_price: c.current_price,
       price_change_percentage_24h: c.price_change_percentage_24h,
     }))
-    cacheTs = Date.now()
-    return cachedPrices
   } catch (err) {
     console.error('CoinGecko fetch failed:', err)
-    return cachedPrices.length ? cachedPrices : MOCK_PRICES
+    return null
   }
 }
 

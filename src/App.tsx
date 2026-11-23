@@ -18,6 +18,7 @@ import Challenges    from '@/pages/challenges/Challenges'
 import Progress      from '@/pages/progress/Progress'
 import Settings      from '@/pages/settings/Settings'
 import Help          from '@/pages/help/Help'
+import { MentionsLegales, Cgu, Confidentialite } from '@/pages/legal/Legal'
 
 function Guard({ children }: { children: React.ReactNode }) {
   const { profile, loading } = useAuth()
@@ -38,6 +39,9 @@ function AppRoutes() {
       <Route path="/login"      element={!loading && profile ? <Navigate to="/dashboard" /> : <Login />} />
       <Route path="/register"   element={!loading && profile ? <Navigate to="/dashboard" /> : <Register />} />
       <Route path="/onboarding" element={<Onboarding />} />
+      <Route path="/mentions-legales" element={<MentionsLegales />} />
+      <Route path="/cgu"              element={<Cgu />} />
+      <Route path="/confidentialite"  element={<Confidentialite />} />
       <Route path="/" element={<Guard><AppLayout /></Guard>}>
         <Route index element={<Navigate to="/dashboard" />} />
         <Route path="dashboard"    element={<Dashboard />} />

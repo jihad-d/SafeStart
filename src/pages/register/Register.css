@@ -142,15 +142,20 @@
 
 .cgu-checkbox {
   margin-top: 2px;
-  width: 20px;
-  height: 20px;
-  border-radius: 6px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  accent-color: var(--pri);
   cursor: pointer;
+}
+
+.cgu-text a {
+  color: var(--pri2);
+  font-weight: 600;
+}
+
+.auth-legal-links {
+  margin-top: 20px;
 }
 
 .cgu-text {

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { RefreshCw, Search, ShoppingCart, TrendingUp, TrendingDown } from 'lucide-react'
 import { fmtEur, fmtPct } from '@/lib/utils'
 import { useMarketPrices } from '@/lib/hooks/usePortfolio'
+import AssetIcon from '@/components/ui/AssetIcon'
 import './Market.css'
 
 export default function Market() {
@@ -55,10 +56,7 @@ export default function Market() {
             <div key={coin.id} className={`market-table-row ${i < filtered.length - 1 ? 'border-bottom' : 'border-none'}`}>
 
               <div className="market-coin-info">
-                {coin.image
-                  ? <img src={coin.image} alt={coin.name} className="market-coin-image" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
-                  : <div className="market-coin-placeholder">{coin.symbol[0]}</div>
-                }
+                <AssetIcon symbol={coin.symbol} size={36} />
                 <div>
                   <div className="market-coin-name">{coin.name}</div>
                   <div className="market-coin-symbol">{coin.symbol}</div>

@@ -147,3 +147,6 @@
   color: var(--pri2);
   font-weight: 700;
 }
+.auth-legal-links {
+  margin-top: 20px;
+}

@@ -758,3 +758,8 @@
   justify-content: center;
   color: var(--pri2);
 }
+
+.settings-legal-links {
+  justify-content: flex-start;
+  margin-top: 14px;
+}

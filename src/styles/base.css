@@ -14,7 +14,7 @@ html, body, #root {
 }
 
 body {
-  font-family: 'Sora', system-ui, sans-serif;
+  font-family: 'Sora Variable', 'Sora', system-ui, sans-serif;
   background: var(--bg);
   color: var(--tx);
   -webkit-font-smoothing: antialiased;
