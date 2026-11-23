@@ -8,7 +8,6 @@ import './Legal.css'
 
 const LAST_UPDATE = '24 novembre 2026'
 
-/** Champ à compléter par l'éditeur du site (visible tant qu'il n'est pas rempli). */
 const Todo = ({ children }: { children: React.ReactNode }) => (
   <mark className="legal-todo">[À compléter : {children}]</mark>
 )
@@ -49,13 +48,12 @@ export function MentionsLegales() {
     <LegalLayout title="Mentions légales">
       <h2>Éditeur du site</h2>
       <p>
-        SafeStart est édité par <Todo>nom et prénom, ou raison sociale</Todo>,{' '}
-        <Todo>statut : particulier, auto-entrepreneur, association…</Todo>.<br />
-        Adresse : <Todo>adresse postale</Todo><br />
-        Contact : <Todo>adresse email de contact</Todo><br />
-        <Todo>numéro SIREN/SIRET, si applicable</Todo>
+        SafeStart est édité par DOUHI Jihad,{' '}
+        Auto-entrepreneuse.<br />
+        Adresse : Ile-de-France.<br />
+        Contact : jihad.douhipro@gmail.com.<br />
       </p>
-      <p>Directeur de la publication : <Todo>nom et prénom</Todo>.</p>
+      <p>Directeur de la publication : DOUHI Jihad.</p>
 
       <h2>Hébergement</h2>
       <p>
@@ -63,7 +61,7 @@ export function MentionsLegales() {
       </p>
       <p>
         Base de données et authentification fournies par <strong>Supabase, Inc.</strong> — supabase.com.
-        Région d'hébergement des données : <Todo>région de ton projet Supabase, ex. Europe (Francfort)</Todo>.
+        Région d'hébergement des données : Europe.
       </p>
 
       <h2>Propriété intellectuelle</h2>
@@ -141,7 +139,7 @@ export function Confidentialite() {
     <LegalLayout title="Politique de confidentialité">
       <h2>Responsable du traitement</h2>
       <p>
-        <Todo>nom de l'éditeur</Todo>, joignable à <Todo>adresse email de contact</Todo>.
+        DOUHI Jihad, joignable à jihad.douhipro@gmail.com.
       </p>
 
       <h2>Données collectées</h2>
@@ -189,7 +187,7 @@ export function Confidentialite() {
         <li>supprimer définitivement ton compte.</li>
       </ul>
       <p>
-        Pour toute autre demande : <Todo>adresse email de contact</Todo>. Si tu estimes que tes droits ne sont pas
+        Pour toute autre demande : jihad.douhipro@gmail.com. Si tu estimes que tes droits ne sont pas
         respectés, tu peux adresser une réclamation à la CNIL (cnil.fr).
       </p>
     </LegalLayout>
