@@ -1,42 +1,59 @@
-import React from 'react'
-import { Clock } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { Clock, CheckCircle, ArrowRight } from 'lucide-react'
+import { MODULES } from '@/lib/modules'
+import { useAuth } from '@/lib/hooks/useAuth'
+import { supabase } from '@/lib/supabase'
 import '@/styles/pages.css'
 
-const MODULES = [
-  { id: 'wallet', title: "C'est quoi un wallet ?", cat: 'Les bases', level: 'Débutant', lvlColor: '#10b981', dur: 4, desc: "Comprends ce qu'est un portefeuille crypto et comment il fonctionne." },
-  { id: 'fees',   title: 'Comprendre les frais de réseau', cat: 'Transactions', level: 'Débutant', lvlColor: '#10b981', dur: 5, desc: 'Découvre les gas fees et pourquoi ils varient.' },
-  { id: 'chain',  title: 'La blockchain en 5 minutes', cat: 'Les bases', level: 'Novice', lvlColor: '#7c5cfc', dur: 5, desc: 'Comprends le fonctionnement décentralisé.' },
-  { id: 'defi',   title: 'Introduction à la DeFi', cat: 'Avancé', level: 'Intermédiaire', lvlColor: '#f59e0b', dur: 8, desc: 'Swaps, liquidité, yield farming expliqués simplement.' },
-]
-
 export default function Learn() {
+  const { profile } = useAuth()
+  const [completed, setCompleted] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    if (!profile?.id || profile.id === 'demo') return
+    supabase
+      .from('module_completions')
+      .select('module_id')
+      .eq('user_id', profile.id)
+      .then(({ data, error }) => {
+        if (error) { console.error(error); return }
+        setCompleted(new Set((data ?? []).map(r => r.module_id as string)))
+      })
+  }, [profile?.id])
+
   return (
     <div className="fade-up flex-container">
       <div>
         <h1 className="text-title">Modules d'apprentissage</h1>
-        <p className="text-subtitle">Des cours courts en français, adaptés à ton niveau. Ils sont en cours de préparation.</p>
+        <p className="text-subtitle">
+          Des leçons courtes suivies d'un quiz de 3 questions. Valide-les ({completed.size}/{MODULES.length}) pour gagner des points et des badges.
+        </p>
       </div>
       <div className="grid-two-columns">
-        {MODULES.map(m => (
-          <div key={m.id} className="dashboard-card">
-            <div className="learn-header">
-              <span 
-                className="learn-badge"
-                style={{ background: `${m.lvlColor}22`, color: m.lvlColor }}
-              >
-                {m.level}
-              </span>
-              <span className="learn-duration ico-inline"><Clock size={12} />{m.dur} min</span>
+        {MODULES.map(m => {
+          const done = completed.has(m.id)
+          return (
+            <div key={m.id} className={`dashboard-card ${done ? 'challenge-done' : ''}`}>
+              <div className="learn-header">
+                <span className="learn-badge" style={{ background: `${m.color}22`, color: m.color }}>{m.level}</span>
+                <span className="learn-duration ico-inline"><Clock size={12} />{m.minutes} min</span>
+              </div>
+              <div className="learn-body">
+                <div className="learn-title">{m.title}</div>
+                <div className="learn-desc">{m.description}</div>
+              </div>
+              <div className="learn-footer">
+                {done
+                  ? <span className="challenge-status ico-inline"><CheckCircle size={14} />Validé</span>
+                  : <span className="learn-pts">+{m.points} pts</span>}
+                <Link to={`/learn/${m.id}`} className={`${done ? 'btn-glass' : 'btn-pri'} learn-btn learn-btn-start`}>
+                  {done ? 'Revoir' : 'Commencer'} <ArrowRight size={13} />
+                </Link>
+              </div>
             </div>
-            <div className="learn-body">
-              <div className="learn-title">{m.title}</div>
-              <div className="learn-desc">{m.desc}</div>
-            </div>
-            <div className="learn-footer">
-              <span className="learn-soon">Bientôt disponible</span>
-            </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

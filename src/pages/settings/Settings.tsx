@@ -30,10 +30,11 @@ export default function Settings() {
     if (!profile) return
     setExporting(true)
     try {
-      const [transactions, portfolio, badges] = await Promise.all([
+      const [transactions, portfolio, badges, modules] = await Promise.all([
         supabase.from('transactions').select('*').eq('user_id', profile.id),
         supabase.from('portfolio_assets').select('*').eq('user_id', profile.id),
         supabase.from('user_badges').select('*').eq('user_id', profile.id),
+        supabase.from('module_completions').select('*').eq('user_id', profile.id),
       ])
       const payload = {
         exported_at: new Date().toISOString(),
@@ -41,6 +42,7 @@ export default function Settings() {
         portfolio: portfolio.data ?? [],
         transactions: transactions.data ?? [],
         badges: badges.data ?? [],
+        modules: modules.data ?? [],
       }
       const url = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }))
       const link = document.createElement('a')
@@ -138,7 +140,7 @@ export default function Settings() {
         <div className="danger-row">
           <div>
             <div className="danger-label">Télécharger mes données</div>
-            <div className="danger-sub">Profil, portfolio, historique et badges au format JSON.</div>
+            <div className="danger-sub">Profil, portfolio, historique, badges et modules au format JSON.</div>
           </div>
           <button className="btn-glass danger-btn-reset" onClick={exportData} disabled={exporting}>
             <span className="ico-inline"><Download size={15} />{exporting ? 'Export…' : 'Télécharger'}</span>

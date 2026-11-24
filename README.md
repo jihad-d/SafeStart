@@ -19,13 +19,14 @@
 | 🎓 **Simulation** | Achats, envois et swaps avec 1 000 € fictifs. Le portfolio, le solde et l'historique sont mis à jour en une seule transaction SQL |
 | 📈 **Prix réels** | Cours CoinGecko (via une fonction Supabase), avec repli sur des prix de secours |
 | 🔒 **Score de sécurité** | Note de 0 à 100 avant chaque opération : part du solde utilisée, volatilité, slippage, validité de l'adresse |
-| 🏆 **Challenges et progression** | Missions calculées à partir des vraies transactions, statistiques et compétences réelles |
+| 🏆 **Challenges, badges et progression** | Missions calculées à partir des vraies transactions, badges et points attribués par le serveur |
+| 📚 **Modules d'apprentissage** | 4 leçons (wallet, frais de réseau, blockchain, DeFi), chacune validée par un quiz |
 | 🧭 **Évaluation de niveau** | Quiz d'accueil obligatoire, que l'on peut refaire depuis les Paramètres |
 | 🔐 **Compte** | Inscription, mot de passe oublié, export des données (JSON) et suppression du compte |
 | 🌗 **Thèmes** | Sombre et clair, mémorisés dans le navigateur |
 | ♿ **Accessibilité** | Contrastes WCAG AA, navigation clavier, lecteurs d'écran, réduction des animations |
 
-**En cours :** modules d'apprentissage (marqués « Bientôt disponible »), badges, mentor IA SafeBot (suspendu).
+**En cours :** évolution du niveau, mentor IA SafeBot (suspendu).
 
 ---
 
@@ -82,6 +83,7 @@ Les tables `transactions` et `portfolio_assets` (contrainte unique `user_id, cry
 | `20261127_send_swap_portfolio.sql` | Envois et swaps appliqués au portfolio (version actuelle de la fonction de transaction) |
 | `20261128_onboarding_score.sql` | Colonne du score de l'évaluation de niveau |
 | `20261128_badges.sql` | Badges attribués automatiquement aux challenges réussis |
+| `20261128_modules.sql` | Modules d'apprentissage validés, points et badges associés |
 
 Tous les fichiers sont dans [`supabase/migrations/`](supabase/migrations/). Les écritures du navigateur passent par des fonctions SQL : il ne peut pas modifier directement son solde, ses points ou son historique.
 

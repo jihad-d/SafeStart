@@ -1,4 +1,4 @@
-import { Award, Trophy, ShoppingCart, Send, ShieldCheck, CalendarCheck, Globe, Repeat, Rocket, type LucideIcon } from 'lucide-react'
+import { Award, Trophy, ShoppingCart, Send, ShieldCheck, CalendarCheck, Globe, Repeat, Rocket, BookOpen, GraduationCap, type LucideIcon } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { supabase } from '@/lib/supabase'
 
@@ -14,6 +14,8 @@ export const BADGE_ICONS: Record<string, LucideIcon> = {
   diversified: Globe,
   smart_swap: Repeat,
   defi_explorer: Rocket,
+  first_module: BookOpen,
+  scholar: GraduationCap,
 }
 
 export const badgeIcon = (code?: string | null): LucideIcon => (code && BADGE_ICONS[code]) || Award

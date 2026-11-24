@@ -17,6 +17,7 @@ import Market        from '@/pages/market/Market'
 import Transactions  from '@/pages/transactions/Transactions'
 import History       from '@/pages/history/History'
 import Learn         from '@/pages/learn/Learn'
+import ModulePage    from '@/pages/learn/ModulePage'
 import Challenges    from '@/pages/challenges/Challenges'
 import Progress      from '@/pages/progress/Progress'
 import Settings      from '@/pages/settings/Settings'
@@ -92,6 +93,7 @@ function AppRoutes() {
         <Route path="transactions" element={<Transactions />} />
         <Route path="history"      element={<History />} />
         <Route path="learn"        element={<Learn />} />
+        <Route path="learn/:moduleId" element={<ModulePage />} />
         <Route path="challenges"   element={<Challenges />} />
         <Route path="progress"     element={<Progress />} />
         <Route path="settings"     element={<Settings />} />
