@@ -132,7 +132,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     init()
 
-    const { data: listener } = client.auth.onAuthStateChange(async (event, session) => {
+    // ⚠️ Ce callback est exécuté pendant que Supabase détient son verrou d'authentification :
+    // y attendre (await) un autre appel Supabase bloque tout (ex. updateUser ne se termine jamais).
+    // Les appels sont donc différés avec setTimeout.
+    const { data: listener } = client.auth.onAuthStateChange((event, session) => {
       // INITIAL_SESSION est géré dans init() ci-dessus
       if (event === 'INITIAL_SESSION') return
 
@@ -143,7 +146,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (event === 'SIGNED_IN' || event === 'PASSWORD_RECOVERY' || (event as string) === 'USER_UPDATED') {
-        await loadOrCreateProfile(session.user.id, session.user.email ?? '')
+        const { id, email } = session.user
+        setTimeout(() => { loadOrCreateProfile(id, email ?? '') }, 0)
       }
     })
 
