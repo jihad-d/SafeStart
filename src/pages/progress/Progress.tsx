@@ -4,26 +4,18 @@ import LevelIcon from '@/components/ui/LevelIcon'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 import { useTransactions } from '@/lib/hooks/useTransactions'
+import { awardBadges, badgeIcon } from '@/lib/badges'
 import toast from 'react-hot-toast'
 import '@/styles/pages.css'
 
 type BadgeRow = {
+  id: string
+  code: string | null
   name: string
-  pts: number
-  desc: string
+  description: string
+  points: number
   unlocked: boolean
 }
-type UserBadgeRecord = {
-  unlocked?: boolean | null
-  earned_at?: string | null
-  badges?: {
-    name?: string | null
-    icon?: string | null
-    pts?: number | null
-    desc?: string | null
-  } | null
-}
-
 
 const LEVELS: Record<string, { title: string; desc: string }> = {
   absolute_beginner: { title: 'Débutant absolu', desc: "Tu pars de zéro, et c'est parfait ! SafeStart va t'accompagner pas à pas." },
@@ -36,7 +28,7 @@ const average = (values: number[]) =>
   values.length ? Math.round(values.reduce((s, v) => s + v, 0) / values.length) : null
 
 export default function Progress() {
-  const { profile } = useAuth()
+  const { profile, patchProfile } = useAuth()
   const [badges, setBadges] = useState<BadgeRow[]>([])
   const { transactions } = useTransactions()
   const level = LEVELS[profile?.level ?? 'absolute_beginner'] ?? LEVELS.absolute_beginner
@@ -58,28 +50,35 @@ export default function Progress() {
         return
       }
 
-      const { data, error } = await supabase
-        .from('user_badges')
-        .select('*, badges(*)')
-        .eq('user_id', profile.id)
+      // Vérifie d'abord les badges gagnés (attribution côté serveur), puis charge le catalogue
+      const { totalPoints } = await awardBadges()
+      if (totalPoints !== null) patchProfile({ total_points: totalPoints })
 
-      if (error) {
-        console.error(error)
+      const [catalog, earned] = await Promise.all([
+        supabase.from('badges').select('id, code, name, description, points_reward'),
+        supabase.from('user_badges').select('badge_id').eq('user_id', profile.id),
+      ])
+      if (catalog.error || earned.error) {
+        console.error(catalog.error ?? earned.error)
         toast.error('Impossible de charger les badges.')
         return
       }
 
-      setBadges(((data ?? []) as UserBadgeRecord[])
-        .filter((row) => row.badges?.name)
-        .map((row) => ({
-          name: row.badges?.name ?? 'Badge',
-          pts: row.badges?.pts ?? 0,
-          desc: row.badges?.desc ?? '',
-          unlocked: row.unlocked ?? Boolean(row.earned_at),
-        })))
+      const earnedIds = new Set((earned.data ?? []).map(r => r.badge_id as string))
+      setBadges(((catalog.data ?? []) as { id: string; code: string | null; name: string; description: string | null; points_reward: number | null }[])
+        .map(b => ({
+          id: b.id,
+          code: b.code,
+          name: b.name,
+          description: b.description ?? '',
+          points: b.points_reward ?? 0,
+          unlocked: earnedIds.has(b.id),
+        }))
+        .sort((x, y) => Number(y.unlocked) - Number(x.unlocked) || x.points - y.points))
     }
 
     loadBadges()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.id])
 
   return (
@@ -138,24 +137,24 @@ export default function Progress() {
       <div className="dashboard-card">
         <div className="skill-section-title ico-inline"><Award size={16} />Badges ({badges.filter(b => b.unlocked).length} / {badges.length})</div>
         {badges.length === 0 && (
-          <p className="text-muted-sm">Aucun badge pour l'instant. Les badges arriveront prochainement.</p>
+          <p className="text-muted-sm">Aucun badge disponible pour l'instant.</p>
         )}
         <div className="badge-grid">
-          {badges.map(b => (
-            <div 
-              key={b.name} 
-              className="badge-item"
-              style={{ 
-                opacity: b.unlocked ? 1 : .35, 
-                filter: b.unlocked ? 'none' : 'grayscale(1)' 
-              }}
-            >
-              <div className="badge-emoji"><Award size={28} /></div>
-              <div className="badge-name">{b.name}</div>
-              <div className="badge-desc">{b.desc}</div>
-              <div className="badge-pts">+{b.pts} pts</div>
-            </div>
-          ))}
+          {badges.map(b => {
+            const Icon = badgeIcon(b.code)
+            return (
+              <div
+                key={b.id}
+                className={`badge-item ${b.unlocked ? 'badge-unlocked' : 'badge-locked'}`}
+                aria-label={`${b.name} : ${b.unlocked ? 'obtenu' : 'pas encore obtenu'}`}
+              >
+                <div className="badge-emoji"><Icon size={28} /></div>
+                <div className="badge-name">{b.name}</div>
+                <div className="badge-desc">{b.description}</div>
+                <div className="badge-pts">{b.unlocked ? 'Obtenu' : `+${b.points} pts`}</div>
+              </div>
+            )
+          })}
         </div>
       </div>
     </div>

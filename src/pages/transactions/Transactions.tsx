@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase'
 import SecurityScoreBadge from '@/components/transactions/SecurityScoreBadge'
 import AIPanel from '@/components/ai/AIPanel'
 import { useMarketPrices, usePortfolio } from '@/lib/hooks/usePortfolio'
+import { awardBadges } from '@/lib/badges'
 import type { TxType } from '@/types'
 import toast from 'react-hot-toast'
 import './Transactions.css' 
@@ -136,6 +137,9 @@ export default function Transactions() {
           patchProfile({ simulated_balance_eur: Number(row.new_balance), total_points: row.new_points })
         }
         reloadPortfolio()
+        // Badges éventuellement débloqués par cette opération
+        const { totalPoints } = await awardBadges()
+        if (totalPoints !== null) patchProfile({ total_points: totalPoints })
       } else {
         // Mode démo : rien n'est enregistré, mise à jour locale uniquement
         patchProfile({

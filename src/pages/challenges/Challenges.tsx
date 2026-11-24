@@ -1,14 +1,24 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { CheckCircle, Target, ArrowRight } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useTransactions } from '@/lib/hooks/useTransactions'
 import { usePortfolio } from '@/lib/hooks/usePortfolio'
 import { evaluateChallenges, LEVEL_COLORS } from '@/lib/challenges'
+import { awardBadges } from '@/lib/badges'
 import '@/styles/pages.css'
 
 export default function Challenges() {
-  const { profile } = useAuth()
+  const { profile, patchProfile } = useAuth()
+
+  // Débloque côté serveur les badges des challenges déjà réussis
+  useEffect(() => {
+    if (!profile?.id || profile.id === 'demo') return
+    awardBadges().then(({ totalPoints }) => {
+      if (totalPoints !== null) patchProfile({ total_points: totalPoints })
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.id])
   const { transactions, loading } = useTransactions()
   const { positions } = usePortfolio([])
   const challenges = evaluateChallenges({ transactions, holdings: positions.length })
@@ -18,7 +28,7 @@ export default function Challenges() {
     <div className="fade-up flex-container">
       <div>
         <h1 className="text-title">Challenges</h1>
-        <p className="text-subtitle">Des missions pour t'entraîner. Ta progression se met à jour automatiquement à chaque simulation.</p>
+        <p className="text-subtitle">Des missions pour t'entraîner. Chaque challenge réussi débloque un badge et des points.</p>
       </div>
       <div className="grid-three-columns">
         {[
@@ -42,7 +52,9 @@ export default function Challenges() {
                   <span className="challenge-icon"><c.icon size={22} /></span>
                   <span className="challenge-lvl-badge" style={{ background: `${color}22`, color }}>{c.level}</span>
                 </div>
-                {c.done && <span className="challenge-status ico-inline"><CheckCircle size={14} />Réalisé</span>}
+                {c.done
+                  ? <span className="challenge-status ico-inline"><CheckCircle size={14} />Badge obtenu</span>
+                  : <span className="challenge-reward">+{c.reward} pts</span>}
               </div>
               <div className="challenge-title">{c.title}</div>
               <div className="challenge-desc">{c.desc}</div>

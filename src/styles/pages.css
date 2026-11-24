@@ -890,3 +890,25 @@ a.support-btn-action {
     align-items: stretch;
   }
 }
+
+/* Badges : obtenus en couleur, à débloquer grisés */
+.badge-locked {
+  opacity: 0.45;
+  filter: grayscale(1);
+}
+
+.badge-unlocked {
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.badge-unlocked .badge-pts {
+  color: var(--safe);
+  -webkit-text-fill-color: var(--safe);
+  background: none;
+}
+
+.challenge-reward {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--pri2);
+}
