@@ -2,6 +2,35 @@
    ACCUEIL — page publique de présentation
    ═══════════════════════════════════════════════ */
 
+/* ── Fond animé (fibres) derrière la barre du haut et le hero ── */
+.home-page {
+  position: relative;
+  overflow-x: clip;
+}
+
+.home-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: min(100svh, 860px);
+  z-index: 0;
+  pointer-events: none;
+  /* fondu vers le bas pour se fondre dans la suite de la page */
+  -webkit-mask-image: linear-gradient(to bottom, #000 65%, transparent);
+  mask-image: linear-gradient(to bottom, #000 65%, transparent);
+}
+
+/* Voile doux au centre : garde le titre et le texte lisibles par-dessus les fibres */
+.home-backdrop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 55% 42% at 50% 38%, var(--bg) 0%, transparent 100%);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
 .home {
   position: relative;
   z-index: 1;

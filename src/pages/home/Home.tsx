@@ -5,6 +5,7 @@ import {
 } from 'lucide-react'
 import { useTheme } from '@/lib/hooks/useTheme'
 import { LegalLinks } from '@/pages/legal/Legal'
+import GhostFibers from '@/components/ui/GhostFibers/GhostFibers'
 import './Home.css'
 
 const FEATURES = [
@@ -36,10 +37,33 @@ const STEPS = [
   { icon: ShieldCheck, title: 'Apprends des risques', desc: 'Chaque opération est notée et expliquée.' },
 ]
 
+// Moins de fibres sur petit écran (performances mobiles)
+const isSmallScreen = () => typeof window !== 'undefined' && window.matchMedia('(max-width: 640px)').matches
+
 export default function Home() {
   const { theme, toggleTheme } = useTheme()
 
   return (
+    <div className="home-page">
+      {/* Fond animé décoratif derrière le hero */}
+      <div className="home-backdrop" aria-hidden="true">
+        <GhostFibers
+          glowColor="#8b5cf6"
+          secondaryColor="#4f35d2"
+          layers={3}
+          twist={1.2}
+          threads={isSmallScreen() ? 44 : 72}
+          fiberStyle="dots"
+          depthOfField={0.85}
+          brightness={theme === 'light' ? 1 : 0.9}
+          hoverEffect="focus"
+          intro
+          mouseInteraction
+          lightMode={theme === 'light'}
+          dpr={1.5}
+        />
+      </div>
+
     <div className="home">
       <header className="home-nav">
         <Link to="/" className="home-brand" aria-label="SafeStart, accueil">
@@ -120,6 +144,7 @@ export default function Home() {
         <LegalLinks />
         <p className="home-footer-note">SafeStart est un outil éducatif. Les cryptomonnaies réelles comportent un risque de perte en capital.</p>
       </footer>
+    </div>
     </div>
   )
 }
