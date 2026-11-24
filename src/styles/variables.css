@@ -41,6 +41,10 @@
   --surface-header: rgba(13,11,26,0.75);   /* barre du haut */
   --track:          rgba(255,255,255,0.08); /* fond des barres de progression */
   --overlay:        rgba(0,0,0,0.6);        /* voile derrière une fenêtre */
+
+  /* ── Accents lisibles (texte en dégradé, carte de solde) ── */
+  --grad-text: linear-gradient(135deg, #a78bfa, #7c5cfc);
+  --grad-card: linear-gradient(145deg, rgba(124,92,252,0.35), rgba(79,53,210,0.55));
 }
 
 /* ── Light theme overrides ── */
@@ -63,4 +67,8 @@
   --surface-header: rgba(250,249,255,0.85);
   --track:          rgba(124,92,252,0.14);
   --overlay:        rgba(26,21,53,0.35);
+  /* Violet d'accent assombri : contraste ≥ 4.5:1 sur fond clair */
+  --pri2:      #5b3fd6;
+  --grad-text: linear-gradient(135deg, #6a4ee6, #4527c2);
+  --grad-card: linear-gradient(145deg, #6a4ee6, #4527c2);
 }

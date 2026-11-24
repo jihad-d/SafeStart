@@ -8,7 +8,7 @@ import toast from 'react-hot-toast'
 import '@/styles/pages.css'
 
 // ─── UTILS HISTORY 
-const txColor = (t: string) => t === 'buy' ? '#10b981' : t === 'send' ? '#ef4444' : '#6366f1'
+const txColor = (t: string) => t === 'buy' ? '#10b981' : t === 'send' ? '#ef4444' : '#7c5cfc'
 const txLabel = (t: string) => t === 'buy' ? 'Achat' : t === 'send' ? 'Envoi' : 'Swap'
 const scoreClass = (l: string) => l === 'safe' ? 'score-safe' : l === 'warning' ? 'score-warning' : 'score-danger'
 

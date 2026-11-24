@@ -135,7 +135,7 @@ export default function AppLayout() {
             </button>
 
             <span style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'.08em', color:'var(--tx3)' }}>Solde simulé</span>
-            <span style={{ fontSize:16, fontWeight:800, background:'linear-gradient(135deg,#a78bfa,#7c5cfc)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>
+            <span style={{ fontSize:16, fontWeight:800, background:'var(--grad-text)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>
               {fmtEur(profile?.simulated_balance_eur ?? DEFAULT_BALANCE_EUR)}
             </span>
             <span style={{ fontSize:10, padding:'2px 10px', borderRadius:99, background:'rgba(124,92,252,0.15)', color:'var(--pri2)', fontWeight:700, border:'1px solid rgba(124,92,252,0.2)' }}>fictif</span>

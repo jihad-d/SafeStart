@@ -52,7 +52,7 @@ export default function Dashboard() {
           <h1 className="dashboard-title">
             {profile?.username ?? profile?.email?.split('@')[0]},<br/>
             <span className="dashboard-title-gradient">
-              <span className="ico-inline">{LEVEL_LABEL[profile?.level ?? 'absolute_beginner']} <LevelIcon level={profile?.level} size={14} /></span>
+              <span className="ico-inline">{LEVEL_LABEL[profile?.level ?? 'absolute_beginner']} <LevelIcon level={profile?.level} size={22} color="var(--pri2)" aria-hidden="true" /></span>
             </span>
           </h1>
         </div>

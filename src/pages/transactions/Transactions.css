@@ -46,7 +46,7 @@
 }
 
 .tx-tab-btn.active {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, var(--pri), var(--pri3));
   color: #fff;
 }
 

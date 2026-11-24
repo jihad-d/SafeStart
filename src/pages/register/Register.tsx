@@ -25,7 +25,7 @@ export default function Register() {
     if (/[^A-Za-z0-9]/.test(pwd)) s++
     return s
   })()
-  const strColors = ['', '#ef4444', '#f59e0b', '#6366f1', '#10b981']
+  const strColors = ['', '#ef4444', '#f59e0b', '#7c5cfc', '#10b981']
   const strLabels = ['', 'Faible', 'Moyen', 'Bon', 'Excellent']
 
   const submit = async (e: React.FormEvent) => {

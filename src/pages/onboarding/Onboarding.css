@@ -104,7 +104,7 @@
 .ob-progress-bar-fill-result {
   height: 100%;
   border-radius: 3px;
-  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  background: linear-gradient(90deg, var(--pri), var(--pri3));
   transition: width 1s;
 }
 
@@ -163,7 +163,7 @@
 .ob-progress-bar-fill-quiz {
   height: 100%;
   border-radius: 2px;
-  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  background: linear-gradient(90deg, var(--pri), var(--pri3));
   transition: width .5s;
 }
 
