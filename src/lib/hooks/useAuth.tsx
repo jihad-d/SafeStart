@@ -10,7 +10,7 @@ interface AuthCtx {
   signIn: (email: string, password: string) => Promise<{ error: string | null }>
   signUp: (email: string, password: string) => Promise<{ error: string | null; needsEmailConfirmation?: boolean }>
   signOut: () => Promise<void>
-  updateProfile: (data: Partial<UserProfile>) => Promise<void>
+  updateProfile: (data: Partial<UserProfile>) => Promise<{ error: string | null }>
   /** Met à jour le profil en mémoire uniquement (valeurs déjà écrites côté serveur). */
   patchProfile: (data: Partial<UserProfile>) => void
 }
@@ -212,13 +212,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   // Update profil 
-  const updateProfile = async (data: Partial<UserProfile>) => {
-    if (!profile) return
-    const updated = { ...profile, ...data }
-    setProfile(updated)
-    if (supabase) {
-      await supabase.from('profiles').update(data).eq('id', profile.id)
+  // Met à jour le profil en base. En cas d'échec, l'affichage revient à l'état précédent
+  // et l'erreur est renvoyée (elle était ignorée auparavant, ce qui masquait les échecs).
+  const updateProfile = async (data: Partial<UserProfile>): Promise<{ error: string | null }> => {
+    if (!profile) return { error: 'Profil non chargé.' }
+    const previous = profile
+    setProfile({ ...profile, ...data })
+    if (!supabase) return { error: null }
+    const { error } = await supabase.from('profiles').update(data).eq('id', profile.id)
+    if (error) {
+      console.error('updateProfile error:', error)
+      setProfile(previous)
+      return { error: error.message }
     }
+    return { error: null }
   }
 
   const patchProfile = (data: Partial<UserProfile>) => {

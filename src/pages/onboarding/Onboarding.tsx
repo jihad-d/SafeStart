@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { ChevronRight, CheckCircle, XCircle, Target, Clock, Lightbulb } from 'lucide-react'
 import LevelIcon from '@/components/ui/LevelIcon'
 import { useAuth } from '@/lib/hooks/useAuth'
+import type { UserLevel } from '@/types'
+import toast from 'react-hot-toast'
 import './Onboarding.css'
 
 const QUESTIONS = [
@@ -45,7 +47,8 @@ export default function Onboarding() {
       setPhase('result')
       const pct = correct / QUESTIONS.length
       const lvl = pct >= 0.8 ? 'intermediate' : pct >= 0.5 ? 'curious_novice' : 'absolute_beginner'
-      await updateProfile({ level: lvl as any, onboarding_completed: true, onboarding_score: Math.round(pct * 100) })
+      const { error } = await updateProfile({ level: lvl as UserLevel, onboarding_completed: true, onboarding_score: Math.round(pct * 100) })
+      if (error) toast.error("Ton résultat n'a pas pu être enregistré. Réessaie dans un instant.")
     }
   }
 

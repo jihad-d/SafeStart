@@ -91,7 +91,8 @@ export default function Settings() {
   }
 
   const save = async () => {
-    await updateProfile({ username })
+    const { error } = await updateProfile({ username: username.trim() || null })
+    if (error) { toast.error("Le profil n'a pas pu être enregistré. Réessaie dans un instant."); return }
     toast.success('Profil mis à jour !')
   }
 
