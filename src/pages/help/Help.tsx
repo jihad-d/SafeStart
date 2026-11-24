@@ -60,7 +60,7 @@ export default function Help() {
 
       <div className="search-wrapper">
         <Search size={15} className="search-icon" />
-        <input className="glass-input search-input-padding" placeholder="Recherche (gas fees, score, wallet...)" value={search} onChange={e => setSearch(e.target.value)} />
+        <input type="search" aria-label="Rechercher dans la FAQ" className="glass-input search-input-padding" placeholder="Recherche (gas fees, score, wallet...)" value={search} onChange={e => setSearch(e.target.value)} />
       </div>
 
       <div className="dashboard-card faq-card-padding">

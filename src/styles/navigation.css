@@ -84,3 +84,14 @@
     display: block !important;
   }
 }
+
+/* Zone de contenu principale */
+.app-main {
+  padding: 28px;
+}
+
+@media (max-width: 768px) {
+  .app-main {
+    padding: 16px;
+  }
+}

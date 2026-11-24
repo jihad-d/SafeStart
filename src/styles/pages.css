@@ -810,3 +810,60 @@ a.support-btn-action {
   color: var(--safe);
   margin-bottom: 12px;
 }
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE — pages secondaires
+   ═══════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .badge-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .grid-two-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .badge-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Filtres de l'historique : passent à la ligne au lieu de déborder */
+  .flex-row-center {
+    flex-wrap: wrap;
+  }
+
+  /* Niveau (Progression) : empilé */
+  .lvl-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  /* Lignes Paramètres (export, réinitialisation, suppression) : bouton sous le texte */
+  .danger-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .tx-row {
+    padding: 14px;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .grid-three-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .tx-grid-details {
+    grid-template-columns: 1fr;
+  }
+
+  .appearance-grid {
+    flex-direction: column;
+  }
+}

@@ -76,21 +76,21 @@ export default function Register() {
         <p className="register-subtitle">Commence a apprendre la crypto gratuitement</p>
 
         {error && (
-          <div className="register-error-banner">
+          <div className="register-error-banner" role="alert">
             <AlertCircle size={16} />{error}
           </div>
         )}
 
         <form onSubmit={submit} className="register-form">
           <div>
-            <label className="register-label">Email</label>
-            <input className="glass-input" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="toi@example.com" required />
+            <label htmlFor="register-email" className="register-label">Email</label>
+            <input id="register-email" autoComplete="email" className="glass-input" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="toi@example.com" required />
           </div>
           <div>
-            <label className="register-label">Mot de passe</label>
+            <label htmlFor="register-password" className="register-label">Mot de passe</label>
             <div className="password-input-wrapper">
-              <input className="glass-input password-input-padding" type={show ? 'text' : 'password'} value={pwd} onChange={e => setPwd(e.target.value)} placeholder="8 caracteres minimum" required />
-              <button type="button" onClick={() => setShow(!show)} className="password-toggle-btn">
+              <input id="register-password" autoComplete="new-password" aria-describedby="register-password-hint" className="glass-input password-input-padding" type={show ? 'text' : 'password'} value={pwd} onChange={e => setPwd(e.target.value)} placeholder="8 caractères minimum" required />
+              <button type="button" onClick={() => setShow(!show)} className="password-toggle-btn" aria-label={show ? 'Masquer le mot de passe' : 'Afficher le mot de passe'} aria-pressed={show}>
                 {show ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
@@ -105,13 +105,13 @@ export default function Register() {
                     />
                   ))}
                 </div>
-                <span className="strength-label" style={{ color: strColors[strength] }}>{strLabels[strength]}</span>
+                <span id="register-password-hint" className="strength-label" style={{ color: strColors[strength] }}>{strLabels[strength]}</span>
               </div>
             )}
           </div>
           <div>
-            <label className="register-label">Confirmer</label>
-            <input className="glass-input" type="password" value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="........" required />
+            <label htmlFor="register-confirm" className="register-label">Confirmer le mot de passe</label>
+            <input id="register-confirm" autoComplete="new-password" className="glass-input" type="password" value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="........" required />
           </div>
 
           <div className="cgu-label-wrapper">

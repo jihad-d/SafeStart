@@ -154,3 +154,10 @@
 .auth-legal-links {
   margin-top: 20px;
 }
+
+/* Responsive */
+@media (max-width: 480px) {
+  .login-card {
+    padding: 22px 18px;
+  }
+}

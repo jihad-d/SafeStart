@@ -35,7 +35,7 @@ export default function Market() {
       {/* Search */}
       <div className="market-search-wrapper">
         <Search size={15} className="market-search-icon" />
-        <input className="glass-input market-search-input" placeholder="Rechercher Bitcoin, ETH..." value={search} onChange={e => setSearch(e.target.value)} />
+        <input type="search" aria-label="Rechercher une crypto" className="glass-input market-search-input" placeholder="Rechercher Bitcoin, ETH..." value={search} onChange={e => setSearch(e.target.value)} />
       </div>
 
       {/* Table */}

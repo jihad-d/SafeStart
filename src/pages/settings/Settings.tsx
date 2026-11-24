@@ -103,16 +103,16 @@ export default function Settings() {
       <div className="dashboard-card">
         <div className="settings-section-title ico-inline"><User size={16} />Mon profil</div>
         <div className="settings-form-group">
-          <label className="settings-label">Email</label>
-          <input className="glass-input settings-input-disabled" value={profile?.email ?? ''} disabled />
+          <label htmlFor="settings-email" className="settings-label">Email</label>
+          <input id="settings-email" className="glass-input settings-input-disabled" value={profile?.email ?? ''} disabled />
         </div>
         <div className="settings-form-group">
-          <label className="settings-label">Pseudo</label>
-          <input className="glass-input" value={username} onChange={e => setUsername(e.target.value)} placeholder="Mon pseudo SafeStart" />
+          <label htmlFor="settings-username" className="settings-label">Pseudo</label>
+          <input id="settings-username" maxLength={30} className="glass-input" value={username} onChange={e => setUsername(e.target.value)} placeholder="Mon pseudo SafeStart" />
         </div>
         <div className="settings-form-group">
-          <label className="settings-label">Niveau actuel</label>
-          <input className="glass-input settings-input-disabled" value={LEVEL_LABEL[profile?.level ?? 'absolute_beginner']} disabled />
+          <label htmlFor="settings-level" className="settings-label">Niveau actuel</label>
+          <input id="settings-level" className="glass-input settings-input-disabled" value={LEVEL_LABEL[profile?.level ?? 'absolute_beginner']} disabled />
         </div>
         <button className="btn-pri settings-btn-save" onClick={save}><span className="ico-inline"><Save size={15} />Sauvegarder</span></button>
       </div>

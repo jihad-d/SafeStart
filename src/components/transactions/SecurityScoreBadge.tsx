@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { X, Info, CheckCircle, XCircle, AlertTriangle } from 'lucide-react'
 import type { SecurityScore } from '@/types'
 
@@ -10,11 +10,27 @@ export default function SecurityScoreBadge({ score }: { score: SecurityScore }) 
   const r = 22, circ = 2 * Math.PI * r, dash = (score.score / 100) * circ
   const col = COLORS[score.label]
   const cls = score.label === 'safe' ? 'score-safe' : score.label === 'warning' ? 'score-warning' : 'score-danger'
+  const openerRef = useRef<HTMLButtonElement>(null)
+  const closeRef = useRef<HTMLButtonElement>(null)
+
+  // Fenêtre de détail : focus sur « Fermer » à l'ouverture, Échap pour fermer,
+  // puis retour du focus sur le bouton qui l'a ouverte.
+  useEffect(() => {
+    if (!open) return
+    closeRef.current?.focus()
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    document.addEventListener('keydown', onKey)
+    const opener = openerRef.current
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      opener?.focus()
+    }
+  }, [open])
 
   return (
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-        <svg width={56} height={56} style={{ transform: 'rotate(-90deg)', flexShrink: 0 }}>
+        <svg width={56} height={56} aria-hidden="true" style={{ transform: 'rotate(-90deg)', flexShrink: 0 }}>
           <circle cx={28} cy={28} r={r} fill="none" stroke="rgba(255,255,255,.08)" strokeWidth={3.5} />
           <circle cx={28} cy={28} r={r} fill="none" stroke={col} strokeWidth={3.5} strokeLinecap="round"
             strokeDasharray={`${dash} ${circ}`} style={{ transition: 'stroke-dasharray .7s ease' }} />
@@ -26,7 +42,7 @@ export default function SecurityScoreBadge({ score }: { score: SecurityScore }) 
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <span className={cls}>{LABELS[score.label]}</span>
-            <button onClick={() => setOpen(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx3)', padding: 0, display: 'flex' }}>
+            <button ref={openerRef} type="button" onClick={() => setOpen(true)} aria-label="Voir le détail du score" aria-haspopup="dialog" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx3)', padding: 0, display: 'flex' }}>
               <Info size={14} />
             </button>
           </div>
@@ -36,10 +52,10 @@ export default function SecurityScoreBadge({ score }: { score: SecurityScore }) 
       {open && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
           <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,.6)', backdropFilter: 'blur(4px)' }} onClick={() => setOpen(false)} />
-          <div className="glass-card fade-up" style={{ position: 'relative', zIndex: 1, maxWidth: 420, width: '100%' }}>
+          <div className="glass-card fade-up" role="dialog" aria-modal="true" aria-labelledby="score-dialog-title" style={{ position: 'relative', zIndex: 1, maxWidth: 420, width: '100%' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <h3 style={{ fontWeight: 700, fontSize: 16, color: 'var(--tx)' }}>Détail du score : {score.score}/100</h3>
-              <button onClick={() => setOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx3)' }}><X size={20} /></button>
+              <h3 id="score-dialog-title" style={{ fontWeight: 700, fontSize: 16, color: 'var(--tx)' }}>Détail du score : {score.score}/100</h3>
+              <button ref={closeRef} type="button" onClick={() => setOpen(false)} aria-label="Fermer" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx3)' }}><X size={20} /></button>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {score.details.map((d, i) => (

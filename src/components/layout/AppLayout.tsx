@@ -68,6 +68,7 @@ export default function AppLayout() {
             <button 
               className="mobile-close-btn"
               onClick={() => setIsMenuOpen(false)}
+              aria-label="Fermer le menu"
               style={{ background: 'none', border: 'none', color: 'var(--tx3)', cursor: 'pointer' }}
             >
               <X size={20} />
@@ -146,7 +147,7 @@ export default function AppLayout() {
           </div>
         </header>
 
-        <main style={{ flex:1, padding:'28px', overflowY:'auto' }}>
+        <main className="app-main" style={{ flex:1, overflowY:'auto' }}>
           <div style={{ maxWidth:980, margin:'0 auto' }}>
             <Outlet />
           </div>

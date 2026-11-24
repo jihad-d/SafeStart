@@ -283,3 +283,11 @@
   display: inline-flex;
   color: var(--pri2);
 }
+
+/* Responsive */
+@media (max-width: 600px) {
+  .ob-card-intro,
+  .ob-card-result {
+    padding: 24px 20px;
+  }
+}

@@ -185,3 +185,9 @@
   color: var(--tx3);
   margin-top: 20px;
 }
+/* Responsive */
+@media (max-width: 480px) {
+  .register-card-width {
+    padding: 22px 18px;
+  }
+}

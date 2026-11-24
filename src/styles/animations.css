@@ -38,3 +38,21 @@
   height: 48px;
   opacity: .7;
 }
+
+/* ── Respect du réglage système « réduire les animations » ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Les indicateurs de chargement restent lisibles, simplement plus lents */
+  .spin {
+    animation-duration: 1.5s !important;
+    animation-iteration-count: infinite !important;
+  }
+}

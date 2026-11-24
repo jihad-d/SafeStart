@@ -176,10 +176,10 @@ export default function Transactions() {
             <div className="glass-card-base">
               {/* Crypto selector */}
               <div className="tx-form-group">
-                <label className="tx-label">
+                <label htmlFor="tx-crypto" className="tx-label">
                   {tab === 'swap' ? 'Crypto à échanger' : 'Cryptomonnaie'}
                 </label>
-                <select className="glass-input" value={selectedId} onChange={e => setSelectedId(e.target.value)}>
+                <select id="tx-crypto" className="glass-input" value={selectedId} onChange={e => setSelectedId(e.target.value)}>
                   {prices.map(c => (
                     <option key={c.id} value={c.id} className="tx-select-option">
                       {c.name} ({c.symbol}) — {fmtEur(c.current_price, c.current_price < 1 ? 4 : 2)}
@@ -191,8 +191,8 @@ export default function Transactions() {
               {/* Swap target */}
               {tab === 'swap' && (
                 <div className="tx-form-group">
-                  <label className="tx-label">Crypto de destination</label>
-                  <select className="glass-input" value={swapToId} onChange={e => setSwapToId(e.target.value)}>
+                  <label htmlFor="tx-swap-to" className="tx-label">Crypto de destination</label>
+                  <select id="tx-swap-to" className="glass-input" value={swapToId} onChange={e => setSwapToId(e.target.value)}>
                     {prices.filter(c => c.id !== selectedId).map(c => (
                       <option key={c.id} value={c.id} className="tx-select-option">{c.name} ({c.symbol})</option>
                     ))}
@@ -203,8 +203,8 @@ export default function Transactions() {
               {/* Address (send) */}
               {tab === 'send' && (
                 <div className="tx-form-group">
-                  <label className="tx-label">Adresse wallet de destination</label>
-                  <input className="glass-input tx-input-monospace" placeholder="0x... ou adresse Bitcoin" value={address} onChange={e => setAddress(e.target.value)} />
+                  <label htmlFor="tx-address" className="tx-label">Adresse wallet de destination</label>
+                  <input id="tx-address" autoComplete="off" spellCheck={false} className="glass-input tx-input-monospace" placeholder="0x... ou adresse Bitcoin" value={address} onChange={e => setAddress(e.target.value)} />
                   {address && (
                     <p className={`tx-address-status ${validateAddress(address) ? 'tx-address-valid' : 'tx-address-invalid'}`}>
                       <span className="ico-inline">{validateAddress(address) ? <><CheckCircle size={13} />Format valide</> : <><XCircle size={13} />Format invalide — vérifie chaque caractère</>}</span>
@@ -215,10 +215,10 @@ export default function Transactions() {
 
               {/* Amount */}
               <div className="tx-form-group">
-                <label className="tx-label">Montant (€)</label>
+                <label htmlFor="tx-amount" className="tx-label">Montant (€)</label>
                 <div className="tx-amount-wrapper">
                   <span className="tx-amount-currency">€</span>
-                  <input className="glass-input tx-amount-input" type="number" min="1" placeholder="0.00" value={amount} onChange={e => setAmount(e.target.value)} />
+                  <input id="tx-amount" inputMode="decimal" className="glass-input tx-amount-input" type="number" min="1" placeholder="0.00" value={amount} onChange={e => setAmount(e.target.value)} />
                 </div>
                 {amount && coin && parseFloat(amount) > 0 && (
                   <p className="tx-amount-hint">≈ {fmtCrypto(qty, coin.symbol)} au prix de {fmtEur(coin.current_price, coin.current_price < 1 ? 4 : 2)}</p>
@@ -228,7 +228,7 @@ export default function Transactions() {
               {/* Live score */}
               {score && amount && (
                 <div className="tx-score-box">
-                  <label className="tx-label">Score de sécurité</label>
+                  <div className="tx-label">Score de sécurité</div>
                   <SecurityScoreBadge score={score} />
                   {score.label !== 'safe' && (
                     <div className="tx-score-warning">

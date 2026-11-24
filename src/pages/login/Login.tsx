@@ -84,21 +84,21 @@ export default function Login() {
         <p className="login-subtitle">Connecte-toi pour reprendre ta progression</p>
 
         {error && (
-          <div className="login-error-box">
+          <div className="login-error-box" role="alert">
             <AlertCircle size={16} />{error}
           </div>
         )}
 
         <form onSubmit={submit} className="login-form">
           <div>
-            <label className="label-sm login-label">Email</label>
-            <input className="glass-input" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="toi@example.com" required />
+            <label htmlFor="login-email" className="label-sm login-label">Email</label>
+            <input id="login-email" autoComplete="email" className="glass-input" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="toi@example.com" required />
           </div>
           <div>
-            <label className="label-sm login-label">Mot de passe</label>
+            <label htmlFor="login-password" className="label-sm login-label">Mot de passe</label>
             <div className="login-password-wrapper">
-              <input className="glass-input login-password-input" type={show ? 'text' : 'password'} value={pwd} onChange={e => setPwd(e.target.value)} placeholder="••••••••" required />
-              <button type="button" onClick={() => setShow(!show)} className="login-toggle-password">
+              <input id="login-password" autoComplete="current-password" className="glass-input login-password-input" type={show ? 'text' : 'password'} value={pwd} onChange={e => setPwd(e.target.value)} placeholder="••••••••" required />
+              <button type="button" onClick={() => setShow(!show)} className="login-toggle-password" aria-label={show ? 'Masquer le mot de passe' : 'Afficher le mot de passe'} aria-pressed={show}>
                 {show ? <EyeOff size={17} /> : <Eye size={17} />}
               </button>
             </div>
