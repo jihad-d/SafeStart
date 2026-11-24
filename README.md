@@ -80,6 +80,8 @@ Les tables `transactions` et `portfolio_assets` (contrainte unique `user_id, cry
 | `20261126_security_rls.sql` | Règles RLS, droits, protection des colonnes sensibles du profil |
 | `20261126_cleanup_policies.sql` | Nettoyage des anciennes règles RLS |
 | `20261127_send_swap_portfolio.sql` | Envois et swaps appliqués au portfolio (version actuelle de la fonction de transaction) |
+| `20261128_onboarding_score.sql` | Colonne du score de l'évaluation de niveau |
+| `20261128_badges.sql` | Badges attribués automatiquement aux challenges réussis |
 
 Tous les fichiers sont dans [`supabase/migrations/`](supabase/migrations/). Les écritures du navigateur passent par des fonctions SQL : il ne peut pas modifier directement son solde, ses points ou son historique.
 
