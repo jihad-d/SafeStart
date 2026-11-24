@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react'
-import { useSearchParams, useNavigate } from 'react-router-dom'
+import React, { useEffect, useMemo, useState } from 'react'
+import { useSearchParams, useNavigate, Link } from 'react-router-dom'
 import { ShoppingCart, Send, ArrowLeftRight, CheckCircle, AlertTriangle, XCircle, Lightbulb, ArrowRight, ArrowLeft } from 'lucide-react'
 import { fmtEur, fmtCrypto, calcSecurityScore, simulateFees, simulateGas, simulateSlippage, validateAddress, DEFAULT_BALANCE_EUR } from '@/lib/utils'
 import { useAuth } from '@/lib/hooks/useAuth'
@@ -34,9 +34,27 @@ export default function Transactions() {
 
   // Prix en direct (CoinGecko), avec repli sur des prix de secours si l'API est indisponible
   const { prices } = useMarketPrices()
-  const { totalValue: portfolioValue } = usePortfolio(prices)
-  const coin = prices.find(c => c.id === selectedId) ?? prices[0]
-  const swapTo = prices.find(c => c.id === swapToId) ?? prices[1]
+  const { positions, totalValue: portfolioValue, loading: portfolioLoading, reload: reloadPortfolio } = usePortfolio(prices)
+  const balance = profile?.simulated_balance_eur ?? DEFAULT_BALANCE_EUR
+
+  // Envoi et swap : on ne peut utiliser que des cryptos détenues
+  const needsHolding = tab !== 'buy'
+  const heldIds = positions.map(p => p.crypto_id)
+  const sourceCoins = needsHolding ? prices.filter(c => heldIds.includes(c.id)) : prices
+  const coin = sourceCoins.find(c => c.id === selectedId) ?? sourceCoins[0] ?? prices[0]
+  const swapTo = prices.find(c => c.id === swapToId && c.id !== coin?.id) ?? prices.find(c => c.id !== coin?.id) ?? prices[1]
+  const held = positions.find(p => p.crypto_id === coin?.id)
+  const heldQty = held?.quantity ?? 0
+  const heldValue = coin ? heldQty * coin.current_price : 0
+
+  // Garde une sélection cohérente quand on change d'onglet ou que le portfolio se charge
+  useEffect(() => {
+    if (coin && coin.id !== selectedId) setSelectedId(coin.id)
+  }, [coin?.id, selectedId])
+  useEffect(() => {
+    if (swapTo && swapTo.id !== swapToId) setSwapToId(swapTo.id)
+  }, [swapTo?.id, swapToId])
+
   const qty = amount && coin ? parseFloat(amount) / coin.current_price : 0
   const fees = amount ? simulateFees(parseFloat(amount)) : 0
   // Valeurs aléatoires figées tant que les paramètres ne changent pas
@@ -47,10 +65,15 @@ export default function Transactions() {
     [amount, selectedId, swapToId],
   )
 
+  const receivedQty = tab === 'swap' && amount && swapTo
+    ? (parseFloat(amount) * (1 - slippage / 100)) / swapTo.current_price
+    : 0
+
   const score = (amount && coin) ? calcSecurityScore(
-    tab, 
+    tab,
     parseFloat(amount),
-    profile?.simulated_balance_eur ?? DEFAULT_BALANCE_EUR,
+    // Part utilisée : du solde en euros (achat) ou de la crypto détenue (envoi, swap)
+    needsHolding ? heldValue : balance,
     portfolioValue,
     Math.abs(coin.price_change_percentage_24h),
     tab === 'swap' ? slippage : 0,
@@ -59,7 +82,9 @@ export default function Transactions() {
 
   const proceed = () => {
     if (!amount || parseFloat(amount) <= 0) { toast.error('Saisis un montant valide.'); return }
-    if (parseFloat(amount) + (tab === 'buy' ? fees : 0) > (profile?.simulated_balance_eur ?? DEFAULT_BALANCE_EUR)) { toast.error('Solde insuffisant (frais inclus).'); return }
+    if (tab === 'buy' && parseFloat(amount) + fees > balance) { toast.error('Solde insuffisant (frais inclus).'); return }
+    if (needsHolding && qty > heldQty * 1.000001) { toast.error(`Tu ne détiens que ${fmtCrypto(heldQty, coin.symbol)}.`); return }
+    if (tab === 'send' && gas > balance) { toast.error('Solde en euros insuffisant pour payer les frais de gas.'); return }
     if (tab === 'send' && !validateAddress(address)) { toast.error('Adresse wallet invalide.'); return }
     setStep('summary')
   }
@@ -70,7 +95,7 @@ export default function Transactions() {
     try {
       await new Promise(r => setTimeout(r, 800))
 
-      const cost = parseFloat(amount) + (tab === 'buy' ? fees : 0)
+      const cost = tab === 'buy' ? parseFloat(amount) + fees : tab === 'send' ? gas : 0
 
       if (profile && profile.id !== 'demo' && supabase) {
         const aiComment =
@@ -99,6 +124,10 @@ export default function Transactions() {
           p_security_score: score?.score ?? 0,
           p_security_score_label: score?.label ?? 'warning',
           p_ai_comment: aiComment,
+          p_to_crypto_id: tab === 'swap' ? swapTo.id : null,
+          p_to_crypto_name: tab === 'swap' ? swapTo.name : null,
+          p_to_crypto_image: tab === 'swap' ? swapTo.image : null,
+          p_to_price_eur: tab === 'swap' ? swapTo.current_price : null,
         })
 
         if (error) throw error
@@ -106,6 +135,7 @@ export default function Transactions() {
         if (row) {
           patchProfile({ simulated_balance_eur: Number(row.new_balance), total_points: row.new_points })
         }
+        reloadPortfolio()
       } else {
         // Mode démo : rien n'est enregistré, mise à jour locale uniquement
         patchProfile({
@@ -119,7 +149,11 @@ export default function Transactions() {
     } catch (error) {
       console.error(error)
       const message = (error as { message?: string })?.message ?? ''
-      toast.error(message.includes('Solde insuffisant') ? 'Solde insuffisant.' : "Impossible d'enregistrer la transaction.")
+      toast.error(
+        message.includes('Solde insuffisant') ? 'Solde insuffisant.'
+          : message.includes('Quantité insuffisante') ? 'Tu ne détiens pas assez de cette crypto.'
+          : "Impossible d'enregistrer la transaction.",
+      )
     } finally {
       setConfirming(false)
     }
@@ -133,7 +167,9 @@ export default function Transactions() {
         <CheckCircle size={52} className="tx-done-icon" />
         <h2 className="tx-done-title">Transaction confirmée !</h2>
         <p className="tx-done-text">
-          Simulation de {tab === 'buy' ? 'l\'achat' : tab === 'send' ? 'l\'envoi' : 'l\'échange'} de {fmtEur(parseFloat(amount))} enregistrée. +10 pts !
+          {tab === 'buy' && <>Achat de {fmtCrypto(qty, coin.symbol)} pour {fmtEur(parseFloat(amount))} enregistré. +10 pts !</>}
+          {tab === 'send' && <>Envoi de {fmtCrypto(qty, coin.symbol)} ({fmtEur(parseFloat(amount))}) enregistré. +10 pts !</>}
+          {tab === 'swap' && <>Échange de {fmtCrypto(qty, coin.symbol)} contre ≈ {fmtCrypto(receivedQty, swapTo.symbol)} enregistré. +10 pts !</>}
         </p>
         <div className="tx-ai-feedback-box">
           <p className="tx-ai-feedback-title ico-inline"><Lightbulb size={14} />Conseil SafeStart</p>
@@ -171,29 +207,41 @@ export default function Transactions() {
       <div className="tx-grid-layout">
         <div className="tx-form-column">
 
+          {/* Envoi / swap impossible sans crypto détenue */}
+          {step === 'form' && needsHolding && !portfolioLoading && sourceCoins.length === 0 && (
+            <div className="glass-card-base tx-empty">
+              <p>{tab === 'send' ? 'Pour envoyer' : 'Pour échanger'} une crypto, il faut d'abord en détenir.</p>
+              <button className="btn-pri" onClick={() => setTab('buy')}>Simuler un achat</button>
+              <Link to="/wallet" className="tx-empty-link">Voir mon wallet</Link>
+            </div>
+          )}
+
           {/* FORM */}
-          {step === 'form' && (
+          {step === 'form' && (!needsHolding || sourceCoins.length > 0) && (
             <div className="glass-card-base">
               {/* Crypto selector */}
               <div className="tx-form-group">
                 <label htmlFor="tx-crypto" className="tx-label">
                   {tab === 'swap' ? 'Crypto à échanger' : 'Cryptomonnaie'}
                 </label>
-                <select id="tx-crypto" className="glass-input" value={selectedId} onChange={e => setSelectedId(e.target.value)}>
-                  {prices.map(c => (
+                <select id="tx-crypto" className="glass-input" value={coin?.id ?? ''} onChange={e => setSelectedId(e.target.value)}>
+                  {sourceCoins.map(c => (
                     <option key={c.id} value={c.id} className="tx-select-option">
                       {c.name} ({c.symbol}) — {fmtEur(c.current_price, c.current_price < 1 ? 4 : 2)}
                     </option>
                   ))}
                 </select>
+                {needsHolding && held && (
+                  <p className="tx-amount-hint">Tu détiens {fmtCrypto(heldQty, coin.symbol)} (≈ {fmtEur(heldValue)})</p>
+                )}
               </div>
 
               {/* Swap target */}
               {tab === 'swap' && (
                 <div className="tx-form-group">
                   <label htmlFor="tx-swap-to" className="tx-label">Crypto de destination</label>
-                  <select id="tx-swap-to" className="glass-input" value={swapToId} onChange={e => setSwapToId(e.target.value)}>
-                    {prices.filter(c => c.id !== selectedId).map(c => (
+                  <select id="tx-swap-to" className="glass-input" value={swapTo?.id ?? ''} onChange={e => setSwapToId(e.target.value)}>
+                    {prices.filter(c => c.id !== coin?.id).map(c => (
                       <option key={c.id} value={c.id} className="tx-select-option">{c.name} ({c.symbol})</option>
                     ))}
                   </select>
@@ -219,9 +267,18 @@ export default function Transactions() {
                 <div className="tx-amount-wrapper">
                   <span className="tx-amount-currency">€</span>
                   <input id="tx-amount" inputMode="decimal" className="glass-input tx-amount-input" type="number" min="1" placeholder="0.00" value={amount} onChange={e => setAmount(e.target.value)} />
+                  {needsHolding && heldValue > 0 && (
+                    <button type="button" className="tx-max-btn" onClick={() => setAmount((Math.floor(heldValue * 100) / 100).toFixed(2))}>
+                      Max
+                    </button>
+                  )}
                 </div>
+                {tab === 'buy' && <p className="tx-amount-hint">Solde disponible : {fmtEur(balance)}</p>}
                 {amount && coin && parseFloat(amount) > 0 && (
-                  <p className="tx-amount-hint">≈ {fmtCrypto(qty, coin.symbol)} au prix de {fmtEur(coin.current_price, coin.current_price < 1 ? 4 : 2)}</p>
+                  <p className="tx-amount-hint">
+                    ≈ {fmtCrypto(qty, coin.symbol)} au prix de {fmtEur(coin.current_price, coin.current_price < 1 ? 4 : 2)}
+                    {tab === 'swap' && <> → tu recevras ≈ {fmtCrypto(receivedQty, swapTo.symbol)}</>}
+                  </p>
                 )}
               </div>
 
@@ -252,11 +309,12 @@ export default function Transactions() {
                   ['Type', tab === 'buy' ? 'Achat simulé' : tab === 'send' ? 'Envoi simulé' : 'Swap simulé'],
                   ['Crypto', `${coin?.name} (${coin?.symbol})`],
                   ['Montant', fmtEur(parseFloat(amount))],
-                  ['Quantité estimée', fmtCrypto(qty, coin?.symbol ?? '')],
+                  [tab === 'buy' ? 'Quantité achetée' : tab === 'send' ? 'Quantité envoyée' : 'Quantité échangée', fmtCrypto(qty, coin?.symbol ?? '')],
                   tab === 'buy'  ? ['Frais simulés', fmtEur(fees)] : null,
                   tab === 'send' ? ['Gas fees simulés', fmtEur(gas)] : null,
                   tab === 'swap' ? ['Slippage estimé', `${slippage.toFixed(2)}%`] : null,
-                  tab === 'swap' ? ['Reçu estimé', fmtCrypto(parseFloat(amount) / (swapTo?.current_price ?? 1), swapTo?.symbol ?? '')] : null,
+                  tab === 'swap' ? ['Reçu estimé', fmtCrypto(receivedQty, swapTo?.symbol ?? '')] : null,
+                  ['Coût en euros', fmtEur(tab === 'buy' ? parseFloat(amount) + fees : tab === 'send' ? gas : 0)],
                 ].filter((row): row is SummaryRow => row !== null).map(([k, v]) => (
                   <div key={k} className="tx-summary-row">
                     <span className="tx-summary-key">{k}</span>

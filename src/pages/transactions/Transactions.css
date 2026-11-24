@@ -313,3 +313,45 @@
     padding: 24px 16px;
   }
 }
+/* Bouton « Max » dans le champ montant */
+.tx-amount-wrapper {
+  position: relative;
+}
+
+.tx-max-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--glass2);
+  border: 1px solid var(--border);
+  color: var(--pri2);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+/* État vide : envoi / swap sans crypto */
+.tx-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  color: var(--tx2);
+  font-size: 14px;
+}
+
+.tx-empty-link {
+  color: var(--pri2);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Place pour le bouton « Max » */
+.glass-input.tx-amount-input {
+  padding-right: 64px;
+}
