@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
-import { supabase, OPENED_FROM_RECOVERY_LINK } from '@/lib/supabase'
-import { Toaster } from 'react-hot-toast'
+import { supabase, OPENED_FROM_RECOVERY_LINK, AUTH_LINK_ERROR } from '@/lib/supabase'
+import toast, { Toaster } from 'react-hot-toast'
 import { AuthProvider, useAuth } from '@/lib/hooks/useAuth'
 import { ThemeProvider } from '@/lib/hooks/useTheme'
 
@@ -48,6 +48,18 @@ function AppRoutes() {
     })
     return () => data.subscription.unsubscribe()
   }, [navigate])
+
+  // Lien d'email expiré ou déjà utilisé : on l'explique au lieu d'afficher la connexion sans rien dire
+  useEffect(() => {
+    if (!AUTH_LINK_ERROR) return
+    toast.error(
+      AUTH_LINK_ERROR === 'otp_expired'
+        ? 'Ce lien a expiré ou a déjà été utilisé. Refais une demande depuis la page de connexion.'
+        : 'Ce lien est invalide. Refais une demande depuis la page de connexion.',
+      { duration: 8000 },
+    )
+    window.history.replaceState(null, '', window.location.pathname)
+  }, [])
 
   if (recoveryRedirectPending) {
     recoveryRedirectPending = false

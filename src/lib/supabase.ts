@@ -14,4 +14,10 @@ if (!url || !key) {
 export const OPENED_FROM_RECOVERY_LINK =
   typeof window !== 'undefined' && /type=recovery/.test(window.location.hash + window.location.search)
 
+/** Code d'erreur renvoyé par Supabase dans l'URL (ex. lien expiré ou déjà utilisé). */
+export const AUTH_LINK_ERROR =
+  typeof window !== 'undefined'
+    ? new URLSearchParams(window.location.hash.slice(1) || window.location.search).get('error_code')
+    : null
+
 export const supabase = createClient(url || '', key || '')
