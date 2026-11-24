@@ -108,7 +108,8 @@
   color: var(--tx3);
 }
 
-.tx-amount-input {
+/* Spécificité renforcée : doit l'emporter sur le padding de .glass-input */
+.glass-input.tx-amount-input {
   padding-left: 30px;
 }
 

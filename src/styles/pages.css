@@ -450,7 +450,7 @@
 .skill-bar-bg {
   height: 6px;
   border-radius: 3px;
-  background: rgba(255, 255, 255, .08);
+  background: var(--track);
   overflow: hidden;
 }
 
@@ -652,7 +652,8 @@
   color: var(--tx3);
 }
 
-.search-input-padding {
+/* Spécificité renforcée : doit l'emporter sur le padding de .glass-input */
+.glass-input.search-input-padding {
   padding-left: 40px;
 }
 

@@ -31,7 +31,7 @@ export default function SecurityScoreBadge({ score }: { score: SecurityScore }) 
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
         <svg width={56} height={56} aria-hidden="true" style={{ transform: 'rotate(-90deg)', flexShrink: 0 }}>
-          <circle cx={28} cy={28} r={r} fill="none" stroke="rgba(255,255,255,.08)" strokeWidth={3.5} />
+          <circle cx={28} cy={28} r={r} fill="none" stroke="var(--track)" strokeWidth={3.5} />
           <circle cx={28} cy={28} r={r} fill="none" stroke={col} strokeWidth={3.5} strokeLinecap="round"
             strokeDasharray={`${dash} ${circ}`} style={{ transition: 'stroke-dasharray .7s ease' }} />
         </svg>
@@ -51,7 +51,7 @@ export default function SecurityScoreBadge({ score }: { score: SecurityScore }) 
 
       {open && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
-          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,.6)', backdropFilter: 'blur(4px)' }} onClick={() => setOpen(false)} />
+          <div style={{ position: 'absolute', inset: 0, background: 'var(--overlay)', backdropFilter: 'blur(4px)' }} onClick={() => setOpen(false)} />
           <div className="glass-card fade-up" role="dialog" aria-modal="true" aria-labelledby="score-dialog-title" style={{ position: 'relative', zIndex: 1, maxWidth: 420, width: '100%' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <h3 id="score-dialog-title" style={{ fontWeight: 700, fontSize: 16, color: 'var(--tx)' }}>Détail du score : {score.score}/100</h3>

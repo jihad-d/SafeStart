@@ -42,9 +42,9 @@ export default function AppLayout() {
         style={{
           width: 252, height:'100vh', position:'fixed', left:0, top:0,
           display:'flex', flexDirection:'column', zIndex:40,
-          background:'rgba(18,15,36,0.85)',
+          background:'var(--surface-nav)',
           backdropFilter:'blur(32px) saturate(180%)',
-          borderRight:'1px solid rgba(124,92,252,0.12)',
+          borderRight:'1px solid var(--border)',
         }}
       >
 
@@ -120,9 +120,9 @@ export default function AppLayout() {
           position:'sticky', top:0, zIndex:30,
           padding:'14px 28px',
           display:'flex', alignItems:'center', justifyContent:'space-between',
-          background:'rgba(13,11,26,0.75)',
+          background:'var(--surface-header)',
           backdropFilter:'blur(24px)',
-          borderBottom:'1px solid rgba(124,92,252,0.1)',
+          borderBottom:'1px solid var(--border)',
         }}>
           <div style={{ display:'flex', alignItems:'center', gap:10 }}>
             <button 

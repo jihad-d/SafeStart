@@ -92,7 +92,8 @@
   position: relative;
 }
 
-.password-input-padding {
+/* Spécificité renforcée : doit l'emporter sur le padding de .glass-input */
+.glass-input.password-input-padding {
   padding-right: 44px;
 }
 

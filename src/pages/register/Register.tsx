@@ -49,18 +49,18 @@ export default function Register() {
     const { error, needsEmailConfirmation } = await signUp(email, pwd)
 
     if (error) {
-      setError(error.includes('already') ? 'Email deja utilise.' : error)
+      setError(error.includes('already') ? 'Cet email est déjà utilisé.' : error)
       setLoading(false)
       return
     }
 
     if (needsEmailConfirmation) {
-      toast.success('Compte cree ! Verifie ton email pour confirmer ton inscription.')
+      toast.success('Compte créé ! Vérifie ton email pour confirmer ton inscription.')
       navigate('/login')
       return
     }
 
-    toast.success('Compte cree !')
+    toast.success('Compte créé !')
     navigate('/onboarding')
   }
 
@@ -72,8 +72,8 @@ export default function Register() {
       </Link>
 
       <div className="glass-card fade-up register-card-width">
-        <h1 className="register-title">Creer un compte</h1>
-        <p className="register-subtitle">Commence a apprendre la crypto gratuitement</p>
+        <h1 className="register-title">Créer un compte</h1>
+        <p className="register-subtitle">Commence à apprendre la crypto gratuitement</p>
 
         {error && (
           <div className="register-error-banner" role="alert">
@@ -101,7 +101,7 @@ export default function Register() {
                     <div 
                       key={i} 
                       className="strength-bar"
-                      style={{ background: i <= strength ? strColors[strength] : 'rgba(255,255,255,.1)' }} 
+                      style={{ background: i <= strength ? strColors[strength] : 'var(--track)' }} 
                     />
                   ))}
                 </div>
@@ -129,12 +129,12 @@ export default function Register() {
           </div>
 
           <button className="btn-pri register-btn-submit" type="submit" disabled={loading || !cgu}>
-            {loading ? <span className="loading-spinner spin" /> : 'Creer mon compte'}
+            {loading ? <span className="loading-spinner spin" /> : 'Créer mon compte'}
           </button>
         </form>
 
         <p className="register-footer-text">
-          Deja un compte ?{' '}
+          Déjà un compte ?{' '}
           <Link to="/login" style={{ color: 'var(--pri)', fontWeight: 600 }}>Se connecter</Link>
         </p>
       </div>

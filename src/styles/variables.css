@@ -35,6 +35,12 @@
   --shadow:    0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
   --shadow-lg: 0 24px 70px rgba(0,0,0,0.6);
   --glow:      0 0 40px rgba(124,92,252,0.3);
+
+  /* ── Surfaces adaptées au thème ── */
+  --surface-nav:    rgba(18,15,36,0.85);   /* barre latérale */
+  --surface-header: rgba(13,11,26,0.75);   /* barre du haut */
+  --track:          rgba(255,255,255,0.08); /* fond des barres de progression */
+  --overlay:        rgba(0,0,0,0.6);        /* voile derrière une fenêtre */
 }
 
 /* ── Light theme overrides ── */
@@ -49,8 +55,12 @@
   --glass:       rgba(255,255,255,0.65);
   --glass2:      rgba(255,255,255,0.88);
   --glass-heavy: rgba(255,255,255,0.96);
-  --border:      rgba(124,92,252,0.14);
-  --border2:     rgba(124,92,252,0.06);
+  --border:      rgba(124,92,252,0.22);
+  --border2:     rgba(124,92,252,0.10);
   --shadow:      0 8px 32px rgba(124,92,252,0.10);
   --shadow-lg:   0 24px 60px rgba(124,92,252,0.16);
+  --surface-nav:    rgba(255,255,255,0.88);
+  --surface-header: rgba(250,249,255,0.85);
+  --track:          rgba(124,92,252,0.14);
+  --overlay:        rgba(26,21,53,0.35);
 }

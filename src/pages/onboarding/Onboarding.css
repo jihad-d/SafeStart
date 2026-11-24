@@ -151,7 +151,7 @@
 .ob-progress-container {
   height: 4px;
   border-radius: 2px;
-  background: rgba(255, 255, 255, .08);
+  background: var(--track);
   overflow: hidden;
 }
 
@@ -223,7 +223,7 @@
   width: 26px;
   height: 26px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, .07);
+  background: var(--track);
   display: flex;
   align-items: center;
   justify-content: center;
