@@ -13,12 +13,10 @@
     "@fontsource-variable/sora": "^5.3.0",
     "@supabase/supabase-js": "^2.43.4",
     "lucide-react": "^0.400.0",
-    "openai": "^6.36.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hot-toast": "^2.4.1",
-    "react-router-dom": "^6.23.1",
-    "recharts": "^2.12.7"
+    "react-router-dom": "^6.23.1"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",
