@@ -5,6 +5,7 @@ import toast, { Toaster } from 'react-hot-toast'
 import { AuthProvider, useAuth } from '@/lib/hooks/useAuth'
 import { ThemeProvider } from '@/lib/hooks/useTheme'
 
+import Home          from '@/pages/home/Home'
 import Login         from '@/pages/login/Login'
 import Register      from '@/pages/register/Register'
 import ResetPassword from '@/pages/login/ResetPassword'
@@ -22,13 +23,15 @@ import Settings      from '@/pages/settings/Settings'
 import Help          from '@/pages/help/Help'
 import { MentionsLegales, Cgu, Confidentialite } from '@/pages/legal/Legal'
 
+const PageLoader = () => (
+  <div className="page-loader" role="status" aria-label="Chargement">
+    <div className="page-loader-spinner spin" />
+  </div>
+)
+
 function Guard({ children }: { children: React.ReactNode }) {
   const { profile, loading } = useAuth()
-  if (loading) return (
-    <div className="page-loader" role="status" aria-label="Chargement">
-      <div className="page-loader-spinner spin" />
-    </div>
-  )
+  if (loading) return <PageLoader />
   if (!profile) return <Navigate to="/login" replace />
   return <>{children}</>
 }
@@ -75,8 +78,11 @@ function AppRoutes() {
       <Route path="/mentions-legales" element={<MentionsLegales />} />
       <Route path="/cgu"              element={<Cgu />} />
       <Route path="/confidentialite"  element={<Confidentialite />} />
-      <Route path="/" element={<Guard><AppLayout /></Guard>}>
-        <Route index element={<Navigate to="/dashboard" />} />
+      {/* Accueil public ; un utilisateur connecté va directement à son tableau de bord */}
+      <Route path="/" element={
+        loading ? <PageLoader /> : profile ? <Navigate to="/dashboard" replace /> : <Home />
+      } />
+      <Route element={<Guard><AppLayout /></Guard>}>
         <Route path="dashboard"    element={<Dashboard />} />
         <Route path="wallet"       element={<Wallet />} />
         <Route path="market"       element={<Market />} />
@@ -88,7 +94,7 @@ function AppRoutes() {
         <Route path="settings"     element={<Settings />} />
         <Route path="help"         element={<Help />} />
       </Route>
-      <Route path="*" element={<Navigate to="/login" />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }
