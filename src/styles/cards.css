@@ -77,6 +77,11 @@
   pointer-events: none;
 }
 
+/* Thème clair : pas de halo décoratif dans le coin des cartes */
+.light .stat-card::after {
+  display: none;
+}
+
 .stat-card:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
