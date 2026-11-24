@@ -259,3 +259,15 @@
     width: auto;
   }
 }
+/* Attribution CoinGecko */
+.market-attribution {
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--tx3);
+  text-align: center;
+}
+
+.market-attribution a {
+  color: var(--pri2);
+  font-weight: 600;
+}

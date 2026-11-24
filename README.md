@@ -1,6 +1,8 @@
 # SafeStart 🛡️
 
-> **Apprends la crypto sans risque** — Plateforme pédagogique de simulation de transactions crypto avec scoring de sécurité en temps réel et agent IA intégré.
+> **Apprends la crypto sans risque** — Simulateur pédagogique de cryptomonnaies : achats, envois et swaps avec un solde fictif, les vrais prix du marché et un score de sécurité pour chaque opération.
+
+**Version en ligne (bêta) : [safe-start-woad.vercel.app](https://safe-start-woad.vercel.app/)**
 
 ![Version](https://img.shields.io/badge/version-0.1.0--beta-7c5cfc?style=flat-square)
 ![React](https://img.shields.io/badge/React-18-61dafb?style=flat-square&logo=react)
@@ -12,14 +14,18 @@
 
 ## ✨ Fonctionnalités
 
-| Feature | Description |
+| Fonctionnalité | Description |
 |---|---|
-| 🎓 **Mode simulation** | Effectue des achats, envois et swaps de crypto avec un solde fictif |
-| 🔒 **Score de sécurité** | Analyse chaque transaction (montant, volatilité, adresse) et attribue un score 0–100 |
-| 🤖 **SafeBot** | Assistant pédagogique — *échanges IA actuellement suspendus* |
-| 📊 **Portfolio live** | Suivi de tes actifs simulés avec P&L et sparklines |
-| 🏆 **Gamification** | Points, niveaux (Débutant → Avancé), challenges et modules d'apprentissage |
-| 🌗 **Thème dark/light** | Basculement en un clic, persisté via classe CSS sur `<html>` |
+| 🎓 **Simulation** | Achats, envois et swaps avec 1 000 € fictifs. Le portfolio, le solde et l'historique sont mis à jour en une seule transaction SQL |
+| 📈 **Prix réels** | Cours CoinGecko (via une fonction Supabase), avec repli sur des prix de secours |
+| 🔒 **Score de sécurité** | Note de 0 à 100 avant chaque opération : part du solde utilisée, volatilité, slippage, validité de l'adresse |
+| 🏆 **Challenges et progression** | Missions calculées à partir des vraies transactions, statistiques et compétences réelles |
+| 🧭 **Évaluation de niveau** | Quiz d'accueil obligatoire, que l'on peut refaire depuis les Paramètres |
+| 🔐 **Compte** | Inscription, mot de passe oublié, export des données (JSON) et suppression du compte |
+| 🌗 **Thèmes** | Sombre et clair, mémorisés dans le navigateur |
+| ♿ **Accessibilité** | Contrastes WCAG AA, navigation clavier, lecteurs d'écran, réduction des animations |
+
+**En cours :** modules d'apprentissage (marqués « Bientôt disponible »), badges, mentor IA SafeBot (suspendu).
 
 ---
 
@@ -28,210 +34,155 @@
 ### Prérequis
 
 - [Node.js](https://nodejs.org/) ≥ 18
-- [npm](https://www.npmjs.com/) ≥ 9 (ou pnpm / yarn)
-- Un projet [Supabase](https://supabase.com/) (gratuit)
+- Un projet [Supabase](https://supabase.com/) (l'offre gratuite suffit)
 
 ### Installation
 
 ```bash
-# 1. Cloner le dépôt
 git clone https://github.com/jihad-d/SafeStart.git
 cd SafeStart
-
-# 2. Installer les dépendances
 npm install
-
-# 3. Configurer les variables d'environnement
-cp .env.example .env.local
-# → Édite .env.local et renseigne VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY
-
-# 4. Lancer le serveur de développement
-npm run dev
+cp .env.example .env.local   # puis renseigne les variables (voir plus bas)
+npm run dev                  # http://localhost:3000
 ```
 
-L'app est disponible sur **http://localhost:5173**.
+Avant le premier lancement, prépare la base de données (section suivante).
 
-### Compte démo
+---
 
-| Champ | Valeur |
+## 🗄️ Base de données Supabase
+
+### Table `profiles`
+
+| Colonne | Type | Description |
+|---|---|---|
+| `id` | `uuid` | Clé vers `auth.users` |
+| `email` | `text` | Email de l'utilisateur |
+| `username` | `text` | Pseudo affiché |
+| `level` | `text` | `absolute_beginner` · `curious_novice` · `intermediate` · `advanced` |
+| `onboarding_completed` | `bool` | Évaluation de niveau terminée |
+| `onboarding_score` | `int` | Score de l'évaluation (%) |
+| `total_points` | `int` | Points accumulés |
+| `simulated_balance_eur` | `numeric` | Solde fictif en euros |
+| `is_premium` | `bool` | Réservé (non utilisé) |
+| `ai_messages_today`, `ai_messages_limit` | `int` | Quota SafeBot (IA suspendue) |
+
+Les tables `transactions` et `portfolio_assets` (contrainte unique `user_id, crypto_id`) et, si besoin, `badges` / `user_badges` complètent le schéma.
+
+### Migrations à exécuter (dans *Supabase → SQL Editor*, dans cet ordre)
+
+| Fichier | Rôle |
 |---|---|
-| Email | `demo@safestart.fr` |
-| Mot de passe | `demo1234` |
+| `20261123_simulated_transactions.sql` | Première version de l'enregistrement atomique des transactions |
+| `20261124_fix_points_and_reset.sql` | Points fixés côté serveur, réinitialisation du portfolio |
+| `20261124_delete_account.sql` | Suppression de compte (RGPD) |
+| `20261125_support_messages.sql` | Table des messages envoyés depuis la page Aide |
+| `20261126_security_rls.sql` | Règles RLS, droits, protection des colonnes sensibles du profil |
+| `20261126_cleanup_policies.sql` | Nettoyage des anciennes règles RLS |
+| `20261127_send_swap_portfolio.sql` | Envois et swaps appliqués au portfolio (version actuelle de la fonction de transaction) |
+
+Tous les fichiers sont dans [`supabase/migrations/`](supabase/migrations/). Les écritures du navigateur passent par des fonctions SQL : il ne peut pas modifier directement son solde, ses points ou son historique.
+
+### Fonction de prix (Edge Function)
+
+[`supabase/functions/market-prices`](supabase/functions/market-prices/index.ts) interroge CoinGecko une fois par minute pour tous les visiteurs. À créer dans *Supabase → Edge Functions* sous le nom exact `market-prices`, avec le secret facultatif `COINGECKO_API_KEY`. Tant qu'elle n'est pas déployée, le site appelle CoinGecko directement.
+
+### Authentification
+
+- *Authentication → URL Configuration* : **Site URL** = l'adresse du site, et dans **Redirect URLs** : `http://localhost:3000/reset-password` et `https://<ton-site>/reset-password`.
+- *Authentication → Emails → SMTP Settings* : brancher un service d'envoi (par exemple Brevo). Le service d'email par défaut de Supabase n'écrit qu'aux membres de l'équipe et très peu de fois par heure.
+
+---
+
+## ⚙️ Variables d'environnement
+
+| Variable | Où | Rôle |
+|---|---|---|
+| `VITE_SUPABASE_URL` | `.env.local` + Vercel | URL du projet Supabase |
+| `VITE_SUPABASE_ANON_KEY` | `.env.local` + Vercel | Clé publique (anon) Supabase |
+| `VITE_COINGECKO_API_KEY` | facultatif | Clé CoinGecko utilisée seulement si la fonction `market-prices` est absente |
+| `COINGECKO_API_KEY` | secret Supabase | Clé CoinGecko de la fonction `market-prices` |
+
+> ⚠️ Tout ce qui commence par `VITE_` est inclus dans le JavaScript envoyé aux visiteurs. N'y mets **jamais** de clé secrète.
+
+Au déploiement, Vercel fournit `VERCEL_PROJECT_PRODUCTION_URL`, utilisée pour l'adresse absolue de l'image de partage (`SITE_URL` peut la remplacer).
 
 ---
 
 ## 🗂️ Structure du projet
 
 ```
-safestart-vite/
-├── public/                    # Fichiers statiques
+├── public/                     # favicon, icône Apple, image de partage
+├── supabase/
+│   ├── migrations/             # scripts SQL (voir l'ordre ci-dessus)
+│   └── functions/market-prices # fonction Edge des prix
 ├── src/
 │   ├── components/
-│   │   ├── ai/
-│   │   │   └── AIPanel.tsx          # Panneau SafeBot (en pause)
-│   │   ├── layout/
-│   │   │   └── AppLayout.tsx        # Sidebar + topbar + Outlet
-│   │   └── transactions/
-│   │       └── SecurityScoreBadge.tsx
-│   │
+│   │   ├── ai/AIPanel.tsx              # panneau SafeBot (en pause)
+│   │   ├── layout/AppLayout.tsx        # barre latérale + barre du haut
+│   │   ├── transactions/SecurityScoreBadge.tsx
+│   │   └── ui/                         # AssetIcon, LevelIcon, GhostFibers (fond animé de l'accueil)
 │   ├── lib/
-│   │   ├── hooks/
-│   │   │   ├── useAuth.tsx          # Contexte auth + profil Supabase
-│   │   │   └── useTheme.tsx         # Thème dark/light persistant
-│   │   ├── supabase.ts              # Client Supabase
-│   │   └── utils.ts                 # fmtEur, calcSecurityScore, simulateFees…
-│   │
-│   ├── pages/                  # Un dossier par page : Page.tsx + Page.css
-│   │   ├── dashboard/               # Vue principale (stats, portfolio, txs récentes)
-│   │   ├── wallet/                  # Portefeuille et actifs
-│   │   ├── market/                  # Cours du marché
-│   │   ├── transactions/            # Formulaire buy / send / swap
-│   │   ├── history/                 # Historique des transactions
-│   │   ├── learn/                   # Modules d'apprentissage
-│   │   ├── challenges/              # Challenges
-│   │   ├── progress/                # Niveau, compétences, badges
-│   │   ├── settings/                # Profil, thème, notifications
-│   │   ├── help/                    # FAQ et support
-│   │   ├── login/ · register/       # Authentification
-│   │   └── onboarding/              # Évaluation de niveau
-│   │
-│   ├── styles/                 # ← Modules CSS (voir section Design System)
-│   │   ├── variables.css            # Design tokens (couleurs, ombres, glass)
-│   │   ├── pages.css                # Styles partagés des pages secondaires
-│   │   ├── base.css                 # Reset, body, mesh background, scrollbar
-│   │   ├── typography.css           # Headings, labels, grad-text
-│   │   ├── cards.css                # glass-card, glass-card-rich, stat-card, grad-card
-│   │   ├── buttons.css              # btn-pri, btn-glass, btn-pill
-│   │   ├── forms.css                # glass-input, toggle switch
-│   │   ├── navigation.css           # nav-item + états hover / active
-│   │   ├── badges.css               # score-safe, score-warning, score-danger
-│   │   └── animations.css           # Keyframes, fade-up, spin, skeleton, typing dots
-│   │
-│   ├── types/
-│   │   └── index.ts                 # Types partagés (TxType, SecurityScore…)
-│   │
-│   ├── App.tsx                      # Routes + Guard + Toaster
-│   ├── index.css                    # Point d'entrée CSS (imports Tailwind + modules)
-│   └── main.tsx                     # Montage React + BrowserRouter
-│
-├── .env.example               # Variables d'environnement requises
-├── index.html
-├── package.json
-├── tailwind.config.js
-├── tsconfig.json
+│   │   ├── hooks/                      # useAuth, useTheme, usePortfolio, useTransactions
+│   │   ├── challenges.ts               # définition et calcul des challenges
+│   │   ├── config.ts                   # adresse de contact
+│   │   ├── supabase.ts                 # client Supabase
+│   │   └── utils.ts                    # prix, formats, score de sécurité
+│   ├── pages/                          # un dossier par page (home, dashboard, wallet, market,
+│   │                                   #   transactions, history, learn, challenges, progress,
+│   │                                   #   settings, help, legal, login, register, onboarding)
+│   ├── styles/                         # variables, base, cartes, boutons, formulaires, animations…
+│   ├── App.tsx                         # routes et garde d'accès
+│   └── main.tsx
+├── vercel.json                         # réécritures SPA + en-têtes de sécurité (CSP…)
 └── vite.config.ts
 ```
 
 ---
 
-## 🎨 Design System
+## 🎨 Design
 
-L'interface utilise une esthétique **dark violet glass** inspirée du style Aura.  
-Tous les styles sont organisés en **9 modules CSS indépendants** dans `src/styles/` et importés dans `src/index.css`.
+Thème **violet « glass »**, sombre et clair. Les couleurs sont des variables CSS dans [`src/styles/variables.css`](src/styles/variables.css), redéfinies sous `.light` pour le thème clair (classe posée sur `<html>` par `useTheme`).
 
-### Tokens principaux (`variables.css`)
-
-```css
---pri:   #7c5cfc   /* Violet principal  */
---pri2:  #a78bfa   /* Violet clair      */
---pri3:  #4f35d2   /* Violet foncé      */
---safe:  #10b981   /* Vert sécurité     */
---warn:  #f59e0b   /* Orange warning    */
---danger:#ef4444   /* Rouge danger      */
---bg:    #0d0b1a   /* Fond principal    */
-```
-
-### Classes utilitaires clés
-
-| Classe | Description |
+| Variable | Rôle |
 |---|---|
-| `.glass-card` | Carte glass standard avec hover lift |
-| `.glass-card-rich` | Carte avec bordure en dégradé |
-| `.stat-card` | Carte stat avec glow radial |
-| `.grad-card` | Carte violet dégradé (hero) |
-| `.btn-pri` | Bouton primary violet |
-| `.btn-glass` | Bouton glass/secondaire |
-| `.glass-input` | Input/select stylisté |
-| `.score-safe/warning/danger` | Badge score coloré |
-| `.fade-up` | Animation d'entrée (translateY + opacity) |
-| `.skeleton` | Placeholder shimmer |
-
-### Thème clair
-
-Ajoute la classe `.light` sur `<html>` pour activer le thème clair (géré par `App.tsx`).
+| `--pri`, `--pri3` | Violet de marque et violet foncé |
+| `--pri2` | Violet des textes d'accent (assombri en thème clair pour le contraste) |
+| `--tx`, `--tx2`, `--tx3` | Texte principal, secondaire, discret (≥ 4,5:1) |
+| `--grad-text`, `--grad-card` | Dégradés adaptés à chaque thème |
+| `--safe`, `--warn`, `--danger` | Couleurs du score de sécurité |
 
 ---
 
-## ⚙️ Variables d'environnement
-
-Copie `.env.example` → `.env.local` et renseigne :
-
-```env
-VITE_SUPABASE_URL=https://xxxx.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
-
-> ⚠️ Tout ce qui commence par `VITE_` est inclus dans le JavaScript envoyé aux visiteurs. Ne mets **jamais** de clé secrète derrière ce préfixe. Aucune clé IA n'est nécessaire : SafeBot est suspendu.
-
----
-
-## 🗄️ Base de données Supabase
-
-Le hook `useAuth` attend une table `profiles` avec les colonnes suivantes :
-
-| Colonne | Type | Description |
-|---|---|---|
-| `id` | `uuid` | Clé étrangère vers `auth.users` |
-| `email` | `text` | Email de l'utilisateur |
-| `username` | `text` | Pseudo affiché |
-| `level` | `text` | `absolute_beginner` · `curious_novice` · `intermediate` · `advanced` |
-| `total_points` | `int` | Points accumulés |
-| `simulated_balance_eur` | `float` | Solde fictif en euros |
-| `onboarding_completed` | `bool` | Onboarding terminé ? |
-| `ai_messages_today` | `int` | Messages SafeBot du jour |
-| `ai_messages_limit` | `int` | Limite journalière (défaut: 20) |
-
-Exécute ensuite [`supabase/migrations/20261123_simulated_transactions.sql`](supabase/migrations/20261123_simulated_transactions.sql) dans *Supabase → SQL Editor* : il ajoute la fonction qui enregistre les transactions simulées de façon atomique (historique, portfolio et solde).
-
----
-
-## 📦 Scripts disponibles
+## 📦 Scripts
 
 ```bash
-npm run dev       # Serveur de développement (HMR)
-npm run build     # Build de production dans dist/
-npm run preview   # Prévisualisation du build
-npm run typecheck # Vérification des types TypeScript
+npm run dev        # serveur de développement
+npm run build      # build de production dans dist/
+npm run preview    # prévisualisation du build
+npm run typecheck  # vérification TypeScript
 ```
 
 ---
 
 ## 🧰 Stack technique
 
-| Outil | Version | Rôle |
-|---|---|---|
-| [React](https://react.dev) | 18 | UI |
-| [Vite](https://vitejs.dev) | 5 | Bundler |
-| [TypeScript](https://typescriptlang.org) | 5 | Typage statique |
-| [React Router](https://reactrouter.com) | 6 | Routing SPA |
-| [Supabase JS](https://supabase.com/docs/reference/javascript) | 2 | Auth + BDD |
-| [Lucide React](https://lucide.dev) | 0.400 | Icônes |
-| [Recharts](https://recharts.org) | 2 | Graphiques |
-| [React Hot Toast](https://react-hot-toast.com) | 2 | Notifications |
-| [Tailwind CSS](https://tailwindcss.com) | 3 | Utilitaires CSS |
+| Outil | Rôle |
+|---|---|
+| [React 18](https://react.dev) + [TypeScript](https://typescriptlang.org) | Interface |
+| [Vite](https://vitejs.dev) | Build |
+| [React Router 6](https://reactrouter.com) | Routage |
+| [Supabase](https://supabase.com) | Authentification, base Postgres (RLS), fonctions SQL et Edge |
+| [CoinGecko API](https://www.coingecko.com/en/api) | Cours des cryptomonnaies |
+| [Lucide](https://lucide.dev) | Icônes |
+| [React Hot Toast](https://react-hot-toast.com) | Notifications |
+| [React Bits — GhostFibers](https://reactbits.dev) | Fond animé de la page d'accueil |
+| [Vercel](https://vercel.com) | Hébergement |
 
----
-
-## 🤝 Contribuer
-
-1. Fork le projet
-2. Crée ta branche : `git checkout -b feature/ma-fonctionnalite`
-3. Commit : `git commit -m 'feat: ajoute X'`
-4. Push : `git push origin feature/ma-fonctionnalite`
-5. Ouvre une Pull Request
+Données de prix fournies par [CoinGecko](https://www.coingecko.com/).
 
 ---
 
 ## 📄 Licence
 
-MIT © SafeStart Team
+MIT © SafeStart

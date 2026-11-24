@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { User, Save, SunMoon, Moon, Sun, AlertTriangle, Download, Shield } from 'lucide-react'
+import { User, Save, SunMoon, Moon, Sun, AlertTriangle, Download, Shield, RotateCcw } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { LegalLinks } from '@/pages/legal/Legal'
 import { useAuth } from '@/lib/hooks/useAuth'
@@ -112,7 +112,12 @@ export default function Settings() {
         </div>
         <div className="settings-form-group">
           <label htmlFor="settings-level" className="settings-label">Niveau actuel</label>
-          <input id="settings-level" className="glass-input settings-input-disabled" value={LEVEL_LABEL[profile?.level ?? 'absolute_beginner']} disabled />
+          <div className="settings-level-row">
+            <input id="settings-level" className="glass-input settings-input-disabled" value={LEVEL_LABEL[profile?.level ?? 'absolute_beginner']} disabled />
+            <button type="button" className="btn-glass settings-level-btn" onClick={() => navigate('/onboarding')}>
+              <span className="ico-inline"><RotateCcw size={14} />Refaire l'évaluation</span>
+            </button>
+          </div>
         </div>
         <button className="btn-pri settings-btn-save" onClick={save}><span className="ico-inline"><Save size={15} />Sauvegarder</span></button>
       </div>

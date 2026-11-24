@@ -868,3 +868,25 @@ a.support-btn-action {
     flex-direction: column;
   }
 }
+
+.settings-level-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.settings-level-row .glass-input {
+  flex: 1;
+}
+
+.settings-level-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .settings-level-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

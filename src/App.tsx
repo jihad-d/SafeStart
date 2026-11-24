@@ -29,10 +29,13 @@ const PageLoader = () => (
   </div>
 )
 
-function Guard({ children }: { children: React.ReactNode }) {
+// Pages réservées aux utilisateurs connectés.
+// Tant que l'évaluation de niveau n'est pas faite, on y renvoie (sauf sur la page d'évaluation elle-même).
+function Guard({ children, onboarding = false }: { children: React.ReactNode; onboarding?: boolean }) {
   const { profile, loading } = useAuth()
   if (loading) return <PageLoader />
   if (!profile) return <Navigate to="/login" replace />
+  if (!onboarding && !profile.onboarding_completed) return <Navigate to="/onboarding" replace />
   return <>{children}</>
 }
 
@@ -73,7 +76,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/login"      element={!loading && profile ? <Navigate to="/dashboard" /> : <Login />} />
       <Route path="/register"   element={!loading && profile ? <Navigate to="/dashboard" /> : <Register />} />
-      <Route path="/onboarding" element={<Onboarding />} />
+      <Route path="/onboarding" element={<Guard onboarding><Onboarding /></Guard>} />
       <Route path="/reset-password"   element={<ResetPassword />} />
       <Route path="/mentions-legales" element={<MentionsLegales />} />
       <Route path="/cgu"              element={<Cgu />} />

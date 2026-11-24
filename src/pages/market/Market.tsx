@@ -83,6 +83,13 @@ export default function Market() {
           ))
         )}
       </div>
+
+      {/* Attribution exigée par les conditions de l'API gratuite de CoinGecko */}
+      <p className="market-attribution">
+        Données de prix fournies par{' '}
+        <a href="https://www.coingecko.com/" target="_blank" rel="noopener noreferrer">CoinGecko</a>
+        . Cours indicatifs, mis à jour toutes les minutes environ.
+      </p>
     </div>
   )
 }
