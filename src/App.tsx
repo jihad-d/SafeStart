@@ -1,5 +1,6 @@
-import React from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import React, { useEffect } from 'react'
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { supabase, OPENED_FROM_RECOVERY_LINK } from '@/lib/supabase'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider, useAuth } from '@/lib/hooks/useAuth'
 import { ThemeProvider } from '@/lib/hooks/useTheme'
@@ -32,8 +33,26 @@ function Guard({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
+// Lien « mot de passe oublié » : on force l'affichage du formulaire de nouveau mot de passe,
+// même si Supabase a redirigé vers la page d'accueil (adresse de retour non autorisée).
+let recoveryRedirectPending = OPENED_FROM_RECOVERY_LINK
+
 function AppRoutes() {
   const { profile, loading } = useAuth()
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    const { data } = supabase.auth.onAuthStateChange(event => {
+      if (event === 'PASSWORD_RECOVERY') navigate('/reset-password', { replace: true })
+    })
+    return () => data.subscription.unsubscribe()
+  }, [navigate])
+
+  if (recoveryRedirectPending) {
+    recoveryRedirectPending = false
+    if (location.pathname !== '/reset-password') return <Navigate to="/reset-password" replace />
+  }
 
   return (
     <Routes>

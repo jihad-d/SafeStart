@@ -22,13 +22,28 @@ export default function Login() {
   }, [navigate, profile])
 
 
+  const [sendingReset, setSendingReset] = useState(false)
+
   const forgotPassword = async () => {
     setError('')
     if (!email) { setError('Saisis ton email ci-dessus, puis clique sur « Mot de passe oublié ? ».'); return }
+    setSendingReset(true)
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
     })
-    if (resetError) { setError(resetError.message); return }
+    setSendingReset(false)
+    if (resetError) {
+      const m = resetError.message.toLowerCase()
+      setError(
+        m.includes('rate limit') || m.includes('security purposes') || resetError.status === 429
+          ? 'Trop de demandes envoyées. Patiente quelques minutes avant de réessayer.'
+          : m.includes('invalid') && m.includes('email')
+            ? 'Adresse email invalide.'
+            : "Impossible d'envoyer l'email pour le moment. Réessaie plus tard.",
+      )
+      console.error('resetPasswordForEmail:', resetError)
+      return
+    }
     toast.success("Si un compte existe pour cet email, un lien de réinitialisation vient d'être envoyé.")
   }
 
@@ -88,7 +103,7 @@ export default function Login() {
               </button>
             </div>
             <div className="login-forgot-password-container">
-              <button type="button" className="login-forgot-password" onClick={forgotPassword}>Mot de passe oublié ?</button>
+              <button type="button" className="login-forgot-password" onClick={forgotPassword} disabled={sendingReset}>{sendingReset ? 'Envoi…' : 'Mot de passe oublié ?'}</button>
             </div>
           </div>
           <button className="btn-pri login-submit-btn" type="submit" disabled={loading}>

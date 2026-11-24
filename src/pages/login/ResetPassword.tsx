@@ -12,7 +12,8 @@ import './Login.css'
  */
 export default function ResetPassword() {
   const navigate = useNavigate()
-  const [ready, setReady] = useState(false)
+  // null = vérification en cours, false = lien invalide, true = formulaire disponible
+  const [ready, setReady] = useState<boolean | null>(null)
   const [pwd, setPwd] = useState('')
   const [confirm, setConfirm] = useState('')
   const [loading, setLoading] = useState(false)
@@ -35,7 +36,18 @@ export default function ResetPassword() {
     setLoading(true)
     const { error: updateError } = await supabase.auth.updateUser({ password: pwd })
     setLoading(false)
-    if (updateError) { setError(updateError.message); return }
+    if (updateError) {
+      const m = updateError.message.toLowerCase()
+      setError(
+        m.includes('different from the old')
+          ? "Le nouveau mot de passe doit être différent de l'ancien."
+          : m.includes('session') || m.includes('jwt')
+            ? 'Ton lien a expiré. Refais une demande depuis la page de connexion.'
+            : 'Impossible de modifier le mot de passe. Réessaie dans un instant.',
+      )
+      console.error('updateUser:', updateError)
+      return
+    }
 
     toast.success('Mot de passe modifié !')
     navigate('/dashboard')
@@ -46,7 +58,9 @@ export default function ResetPassword() {
       <div className="glass-card-rich fade-up login-card">
         <h1 className="login-title">Nouveau mot de passe</h1>
 
-        {!ready ? (
+        {ready === null ? (
+          <p className="login-subtitle">Vérification du lien…</p>
+        ) : !ready ? (
           <p className="login-subtitle">
             Ce lien est invalide ou a expiré. Refais une demande depuis la page de connexion.
           </p>
